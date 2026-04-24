@@ -25,7 +25,7 @@
   --dur: 0.18s;
 }
 
-html, body, #root { height: 100%; }
+html, body, #root { min-height: 100%; }
 
 body {
   font-family: var(--font);
@@ -36,7 +36,14 @@ body {
 }
 
 /* ── App Shell ───────────────────────────────── */
-.app { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
 
 .app-header {
   display: flex;
@@ -233,7 +240,7 @@ body {
 }
 
 /* ── Split Pane ──────────────────────────────── */
-.app-body { display: flex; flex: 1; overflow: hidden; }
+.app-body { display: flex; flex: 1; min-height: 0; overflow: hidden; }
 
 .pane { display: flex; flex-direction: column; overflow: hidden; }
 .pane--editor { border-right: 1px solid var(--border); }

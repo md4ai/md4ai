@@ -12,6 +12,27 @@ const HIGHLIGHT = (code: string, lang: string) => {
 
 const SPEED = 18;
 const TICK = 12;
+const PILLARS = [
+  {
+    title: 'Markdown-first by default',
+    copy: 'Use markdown that models already produce, then layer in charts, KPIs, callouts, timelines, and richer UI only where it helps.',
+  },
+  {
+    title: 'Streaming-safe rendering',
+    copy: 'Render partial responses while tokens arrive, degrade gracefully on malformed blocks, and avoid fragile JSON-only pipelines.',
+  },
+  {
+    title: 'Extensible without lock-in',
+    copy: 'Reach for bridges when you need custom product components, but keep the core authoring experience readable as plain text.',
+  },
+];
+
+const USE_CASES = [
+  'AI chat products',
+  'Ops and analytics reports',
+  'Agent dashboards',
+  'Product and roadmap reviews',
+];
 
 function useStream(full: string) {
   const [text, setText] = useState('');
@@ -70,7 +91,20 @@ export default function ShowcasePage() {
   }, [text, theme]);
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', ...cssVars }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', position: 'relative', overflowX: 'hidden', ...cssVars }}>
+      <div
+        style={{
+          position: 'absolute',
+          inset: '0 0 auto',
+          height: 560,
+          pointerEvents: 'none',
+          background: [
+            'radial-gradient(circle at 14% 18%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 26%)',
+            'radial-gradient(circle at 86% 10%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 28%)',
+            'linear-gradient(180deg, color-mix(in srgb, var(--accent) 4%, var(--bg)) 0%, transparent 100%)',
+          ].join(', '),
+        }}
+      />
       <nav style={{
         position: 'sticky', top: 0, zIndex: 50,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -100,55 +134,124 @@ export default function ShowcasePage() {
         </div>
       </nav>
 
-      <section style={{ textAlign: 'center', padding: '5rem 2rem 3rem' }}>
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-          background: 'color-mix(in srgb, var(--accent) 10%, var(--surface))',
-          border: '1px solid color-mix(in srgb, var(--accent) 25%, var(--border))',
-          color: 'var(--accent)', borderRadius: '9999px', padding: '0.25rem 0.85rem',
-          fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em',
-          textTransform: 'uppercase' as const, marginBottom: '1.5rem',
-        }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block', animation: 'md4ai-pulse 2s infinite' }} />
-          Live demo
+      <section style={{ position: 'relative', padding: '4.75rem 2rem 3rem' }}>
+        <div style={{ maxWidth: 1180, margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0, 1.15fr) minmax(300px, 0.85fr)', gap: '1.5rem', alignItems: 'start' }}>
+          <div style={{ animation: 'md4ai-fade-up 0.7s var(--ease, cubic-bezier(0.16, 1, 0.3, 1)) both' }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+              background: 'color-mix(in srgb, var(--accent) 10%, var(--surface))',
+              border: '1px solid color-mix(in srgb, var(--accent) 25%, var(--border))',
+              color: 'var(--accent)', borderRadius: '9999px', padding: '0.25rem 0.85rem',
+              fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.06em',
+              textTransform: 'uppercase' as const, marginBottom: '1.35rem',
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block', animation: 'md4ai-pulse 2s infinite' }} />
+              Open-source markdown runtime for AI apps
+            </div>
+
+            <h1 style={{ fontSize: 'clamp(2.45rem, 6vw, 4.8rem)', fontWeight: 850, letterSpacing: '-0.06em', lineHeight: 0.96, margin: '0 0 1rem', maxWidth: 760 }}>
+              Plain markdown in.
+              <br />
+              Production UI out.
+            </h1>
+
+            <p style={{ fontSize: 'clamp(1rem, 2vw, 1.15rem)', color: 'var(--text-muted)', maxWidth: 640, margin: '0 0 1.35rem', lineHeight: 1.72 }}>
+              md4ai helps teams render AI responses as polished product surfaces instead of raw chat text. Parse markdown once, stream it safely, and turn it into tables, KPI cards, steps, timelines, charts, callouts, and custom bridges without inventing a new authoring format.
+            </p>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' as const, marginBottom: '1rem' }}>
+              <a href="./docs.html" style={{
+                display: 'inline-flex', alignItems: 'center',
+                background: 'var(--accent)', color: 'var(--bg)',
+                borderRadius: '0.7rem', padding: '0.72rem 1.15rem',
+                fontSize: '0.9rem', fontWeight: 650, textDecoration: 'none',
+                boxShadow: isDark ? '0 10px 30px -16px rgb(0 0 0 / 0.65)' : '0 16px 36px -18px rgb(15 23 42 / 0.35)',
+              }}>Read the docs</a>
+              <a href="./index.html" style={{
+                display: 'inline-flex', alignItems: 'center',
+                background: 'var(--surface)', color: 'var(--text)',
+                border: '1px solid var(--border)', borderRadius: '0.7rem',
+                padding: '0.72rem 1.15rem', fontSize: '0.9rem',
+                fontWeight: 650, textDecoration: 'none',
+              }}>Open playground</a>
+              <code style={{
+                background: 'var(--surface2)', border: '1px solid var(--border)',
+                borderRadius: '0.7rem', padding: '0.72rem 0.9rem',
+                fontSize: '0.82rem', fontWeight: 500, fontFamily: 'JetBrains Mono, monospace',
+              }}>npm install md4ai</code>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' as const }}>
+              {['streaming', 'tables', 'kpis', 'steps', 'timelines', 'bridges'].map((item) => (
+                <span key={item} style={{
+                  border: '1px solid var(--border)',
+                  background: 'color-mix(in srgb, var(--surface) 88%, transparent)',
+                  color: 'var(--text-muted)',
+                  borderRadius: '9999px',
+                  padding: '0.32rem 0.78rem',
+                  fontSize: '0.74rem',
+                  fontWeight: 650,
+                  textTransform: 'capitalize',
+                }}>{item}</span>
+              ))}
+            </div>
+          </div>
+
+          <div style={{
+            background: 'color-mix(in srgb, var(--surface) 94%, transparent)',
+            border: '1px solid var(--border)',
+            borderRadius: '1.25rem',
+            padding: '1.1rem',
+            boxShadow: isDark
+              ? '0 0 0 1px rgb(255 255 255 / 0.03), 0 24px 50px -28px rgb(0 0 0 / 0.85)'
+              : '0 24px 54px -34px rgb(15 23 42 / 0.24)',
+            animation: 'md4ai-fade-up 0.82s 0.08s var(--ease, cubic-bezier(0.16, 1, 0.3, 1)) both',
+          }}>
+            <div style={{ display: 'grid', gap: '0.85rem' }}>
+              <div style={{ display: 'grid', gap: '0.3rem' }}>
+                <strong style={{ fontSize: '0.95rem', letterSpacing: '-0.03em' }}>Why teams reach for it</strong>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.65 }}>
+                  md4ai sits between plain markdown renderers and heavy MDX-like setups. It keeps authoring simple while giving AI output enough structure to feel product-ready.
+                </p>
+              </div>
+              <div style={{ display: 'grid', gap: '0.65rem' }}>
+                {PILLARS.map((pillar, index) => (
+                  <div key={pillar.title} style={{
+                    border: '1px solid var(--border)',
+                    background: 'var(--surface)',
+                    borderRadius: '0.95rem',
+                    padding: '0.9rem 0.95rem',
+                    animation: `md4ai-fade-up 0.7s ${0.16 + (index * 0.08)}s var(--ease, cubic-bezier(0.16, 1, 0.3, 1)) both`,
+                  }}>
+                    <strong style={{ display: 'block', fontSize: '0.86rem', letterSpacing: '-0.02em', marginBottom: '0.2rem' }}>{pillar.title}</strong>
+                    <span style={{ display: 'block', color: 'var(--text-muted)', fontSize: '0.8rem', lineHeight: 1.55 }}>{pillar.copy}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <h1 style={{ fontSize: 'clamp(2.2rem, 5vw, 3.5rem)', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.1, margin: '0 0 1rem' }}>
-          This is an AI response.
-        </h1>
-
-        <p style={{ fontSize: 'clamp(1rem, 2vw, 1.15rem)', color: 'var(--text-muted)', maxWidth: 520, margin: '0 auto 2rem', lineHeight: 1.65 }}>
-          md4ai extends markdown so AI responses automatically render as charts, callouts,
-          metrics, timelines, and payments — no prompt engineering required.
-        </p>
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', flexWrap: 'wrap' as const, marginBottom: '1.5rem' }}>
-          {['charts', 'callouts', 'tables', 'steps', 'kpis', 'bridges'].map((item) => (
-            <span key={item} style={{
+      <section style={{ padding: '0 2rem 2.5rem' }}>
+        <div style={{ maxWidth: 1180, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.9rem' }}>
+          {USE_CASES.map((item, index) => (
+            <div key={item} style={{
               border: '1px solid var(--border)',
-              background: 'var(--surface)',
-              color: 'var(--text-muted)',
-              borderRadius: '9999px',
-              padding: '0.28rem 0.7rem',
-              fontSize: '0.74rem',
-              fontWeight: 600,
-              textTransform: 'capitalize',
-            }}>{item}</span>
+              background: 'color-mix(in srgb, var(--surface) 95%, transparent)',
+              borderRadius: '1rem',
+              padding: '1rem 1.05rem',
+              animation: `md4ai-fade-up 0.75s ${0.14 + (index * 0.06)}s var(--ease, cubic-bezier(0.16, 1, 0.3, 1)) both`,
+            }}>
+              <span style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.45rem' }}>
+                Use case
+              </span>
+              <strong style={{ display: 'block', fontSize: '1rem', letterSpacing: '-0.03em', marginBottom: '0.25rem' }}>{item}</strong>
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem', lineHeight: 1.55 }}>
+                Good fit when you want LLM output to stay editable as markdown but render like a real interface.
+              </span>
+            </div>
           ))}
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' as const }}>
-          <code style={{
-            background: 'var(--surface2)', border: '1px solid var(--border)',
-            borderRadius: '0.5rem', padding: '0.5rem 1rem',
-            fontSize: '0.875rem', fontWeight: 500, fontFamily: 'JetBrains Mono, monospace',
-          }}>npm install md4ai</code>
-          <a href="https://github.com/architprasar/md4ai" style={{
-            display: 'inline-flex', alignItems: 'center',
-            background: 'var(--accent)', color: 'var(--bg)',
-            borderRadius: '0.5rem', padding: '0.5rem 1.1rem',
-            fontSize: '0.875rem', fontWeight: 600, textDecoration: 'none',
-          }}>GitHub →</a>
         </div>
       </section>
 
@@ -176,6 +279,37 @@ export default function ShowcasePage() {
           }}>↺ Replay</button>
         )}
       </div>
+
+      <section style={{ padding: '0 2rem 1.4rem' }}>
+        <div style={{ maxWidth: 1180, margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0, 0.88fr) minmax(300px, 0.52fr)', gap: '1rem' }}>
+          <div style={{
+            border: '1px solid var(--border)',
+            background: 'var(--surface)',
+            borderRadius: '1.1rem',
+            padding: '1rem 1.1rem',
+          }}>
+            <span style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.45rem' }}>
+              What this page is showing
+            </span>
+            <p style={{ color: 'var(--text-muted)', margin: 0, lineHeight: 1.7 }}>
+              The response below is streamed markdown rendered through md4ai. It mixes standard markdown with richer blocks like charts, cards, KPI tiles, tables, steps, timelines, and bridge-powered interactions in the same message flow.
+            </p>
+          </div>
+          <div style={{
+            border: '1px solid var(--border)',
+            background: 'var(--surface)',
+            borderRadius: '1.1rem',
+            padding: '1rem 1.1rem',
+          }}>
+            <span style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.45rem' }}>
+              Happy path
+            </span>
+            <code style={{ display: 'block', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.8rem', lineHeight: 1.75, whiteSpace: 'pre-wrap' as const }}>
+              {`import { parseStreaming } from 'md4ai/core';\nimport { renderContent } from 'md4ai/react';`}
+            </code>
+          </div>
+        </div>
+      </section>
 
       <div style={{ maxWidth: 780, margin: '0 auto', padding: '0 1.5rem 6rem' }}>
         <div style={{
@@ -220,6 +354,15 @@ export default function ShowcasePage() {
         body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
         @keyframes md4ai-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
         @keyframes md4ai-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        @keyframes md4ai-fade-up { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 980px) {
+          nav { padding: 0 1rem !important; }
+          section > div[style*='grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr)'] { grid-template-columns: 1fr !important; }
+          section > div[style*='grid-template-columns: minmax(0, 0.88fr) minmax(300px, 0.52fr)'] { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 720px) {
+          nav { height: auto !important; padding-top: 0.85rem !important; padding-bottom: 0.85rem !important; align-items: flex-start !important; gap: 0.8rem !important; flex-direction: column !important; }
+        }
         .md4ai-root { max-width: 100%; }
         .md4ai-h { font-weight: 700; line-height: 1.25; color: var(--text); margin-bottom: 0.5em; margin-top: 1.75em; letter-spacing: -0.02em; }
         .md4ai-h:first-child { margin-top: 0; }

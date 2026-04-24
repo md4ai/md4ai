@@ -308,17 +308,17 @@ npm install chart.js`}</Code>
 
           {/* ── Quickstart ── */}
           <H2 id="quickstart">Quickstart</H2>
-          <Code lang="tsx">{`import { parse, renderHTML } from 'md4ai';
+          <Code lang="tsx">{`import { parse, renderContent } from 'md4ai';
 
 function AIMessage({ content }: { content: string }) {
-  return renderHTML(parse(content));
+  return renderContent(parse(content));
 }`}</Code>
 
           <P>For streaming responses, call <IC>parseStreaming</IC> on the full accumulated text every chunk. Unclosed fences render as animated skeletons — never throw.</P>
-          <Code lang="tsx">{`import { parseStreaming, renderHTML } from 'md4ai';
+          <Code lang="tsx">{`import { parseStreaming, renderContent } from 'md4ai';
 
 function StreamingMessage({ text }: { text: string }) {
-  return renderHTML(parseStreaming(text));
+  return renderContent(parseStreaming(text));
 }`}</Code>
 
           <Callout type="tip">
@@ -471,14 +471,14 @@ const statusBridge = defineBridge({
   ),
 });`}</Code>
 
-          <H3 id="bridge-register">Register with parse and renderHTML</H3>
+          <H3 id="bridge-register">Register with parse and renderContent</H3>
           <P>Pass the same <IC>bridges</IC> array to both — the parser recognizes the markers, the renderer calls the right component.</P>
-          <Code lang="tsx">{`import { parse, renderHTML } from 'md4ai';
+          <Code lang="tsx">{`import { parse, renderContent } from 'md4ai';
 
 const bridges = [statusBridge, kpiBridge, timelineBridge];
 
 const nodes = parse(markdown, { bridges });
-const ui = renderHTML(nodes, { bridges });`}</Code>
+const ui = renderContent(nodes, { bridges });`}</Code>
 
           <H3 id="bridge-prompt">AI system prompt hints</H3>
           <P>Each bridge auto-generates its hint. Build your full system prompt from the array — never write it by hand.</P>
@@ -493,7 +493,7 @@ You are a helpful assistant.
 
           <H3 id="bridge-host">Host data and events</H3>
           <P>Bridges can pull live data from your app and emit events back. The AI writes identifiers; your store resolves them at render time.</P>
-          <Code lang="tsx">{`renderHTML(nodes, {
+          <Code lang="tsx">{`renderContent(nodes, {
   bridges,
 
   // Data resolvers — AI writes @stock[AAPL], your store fetches the price
@@ -528,10 +528,10 @@ You are a helpful assistant.
           {/* ── Themes ── */}
           <H2 id="themes">Themes</H2>
           <P>Four built-in themes, each with light and dark variants. All use the same CSS variable names as shadcn — plug straight into an existing shadcn app.</P>
-          <Code lang="tsx">{`import { renderHTML, themes } from 'md4ai';
+          <Code lang="tsx">{`import { renderContent, themes } from 'md4ai';
 
 // Use a preset
-renderHTML(nodes, { theme: themes.violet.dark });
+renderContent(nodes, { theme: themes.violet.dark });
 
 // Available presets
 themes.zinc.light   themes.zinc.dark
@@ -551,7 +551,7 @@ themes.blue.light   themes.blue.dark`}</Code>
 const theme = themes[themeName][isDark ? 'dark' : 'light'];
 
 <div style={tokensToCSSVars(theme)}>
-  {renderHTML(nodes, { theme })}
+  {renderContent(nodes, { theme })}
 </div>`}</Code>
 
           <P>Pass any subset of tokens to override — unset tokens fall back to whatever CSS variables are already on the page:</P>
@@ -579,7 +579,7 @@ const theme = themes[themeName][isDark ? 'dark' : 'light'];
           <Code lang="tsx">{`import hljs from 'highlight.js';
 import 'highlight.js/styles/github-dark.css';
 
-renderHTML(nodes, {
+renderContent(nodes, {
   highlight: (code, lang) => {
     if (lang && hljs.getLanguage(lang)) {
       return hljs.highlight(code, { language: lang }).value;
@@ -594,7 +594,7 @@ renderHTML(nodes, {
           <P>Replace any built-in renderer with your own component via the <IC>components</IC> option. Container nodes receive pre-rendered children as <IC>ReactElement[]</IC>.</P>
           <Code lang="tsx">{`import type { ComponentOverrides } from 'md4ai';
 
-renderHTML(nodes, {
+renderContent(nodes, {
   components: {
     // Leaf nodes — receive raw props
     chart: ({ chartType, data }) => (
@@ -622,7 +622,7 @@ renderHTML(nodes, {
           {/* ── Streaming ── */}
           <H2 id="streaming">Streaming</H2>
           <P><IC>parseStreaming</IC> is a lenient wrapper around <IC>parse</IC>. It detects unclosed fenced blocks at the end of the string and auto-closes them before parsing. Call it on the full accumulated text on every chunk.</P>
-          <Code lang="tsx">{`import { parseStreaming, renderHTML } from 'md4ai';
+          <Code lang="tsx">{`import { parseStreaming, renderContent } from 'md4ai';
 
 // Typical usage in an AI chat UI
 let accumulated = '';
@@ -630,7 +630,7 @@ let accumulated = '';
 for await (const chunk of stream) {
   accumulated += chunk;
   const nodes = parseStreaming(accumulated, { bridges });
-  setUI(renderHTML(nodes, { bridges, theme }));
+  setUI(renderContent(nodes, { bridges, theme }));
 }`}</Code>
           <P>Streaming behavior by node type:</P>
           <Table
@@ -660,7 +660,7 @@ for await (const chunk of stream) {
           <H3>parseStreaming(markdown, options?)</H3>
           <P>Same signature and return type as <IC>parse</IC>. Lenient about unclosed blocks at the end of the string. Safe to call on every streaming chunk.</P>
 
-          <H3>renderHTML(nodes, options?)</H3>
+          <H3>renderContent(nodes, options?)</H3>
           <Table
             head={['Option', 'Type', 'Description']}
             rows={[

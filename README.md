@@ -24,21 +24,21 @@ md4ai takes a different approach: **extend markdown itself.** The AI writes mark
 ## Quickstart
 
 ```tsx
-import { parse, renderHTML } from 'md4ai';
+import { parse, renderContent } from 'md4ai';
 
 function AIMessage({ content }: { content: string }) {
-  return renderHTML(parse(content));
+  return renderContent(parse(content));
 }
 ```
 
 For streaming responses — call on the full accumulated text every chunk:
 
 ```tsx
-import { parseStreaming, renderHTML } from 'md4ai';
+import { parseStreaming, renderContent } from 'md4ai';
 
 function StreamingMessage({ text }: { text: string }) {
   // Safe mid-stream — unclosed fences render as placeholders, never throw
-  return renderHTML(parseStreaming(text));
+  return renderContent(parseStreaming(text));
 }
 ```
 
@@ -201,13 +201,13 @@ const statusBridge = defineBridge({
 
 ### Register it
 
-Pass the same `bridges` array to both `parse` and `renderHTML`:
+Pass the same `bridges` array to both `parse` and `renderContent`:
 
 ```tsx
 const bridges = [statusBridge];
 
 const nodes = parse(markdown, { bridges });
-const ui = renderHTML(nodes, { bridges });
+const ui = renderContent(nodes, { bridges });
 ```
 
 ### System prompt hint
@@ -258,7 +258,7 @@ defineBridge({
 Bridges can pull live data from your app and emit events back — the AI writes identifiers, your app resolves them.
 
 ```tsx
-renderHTML(nodes, {
+renderContent(nodes, {
   bridges,
 
   store: {
@@ -300,10 +300,10 @@ The markdown never contains real prices. The AI writes `@stock[AAPL]` — your s
 Four built-in themes, each with light and dark variants. All use the same CSS variable system as shadcn — plug straight into your existing shadcn app.
 
 ```tsx
-import { renderHTML, themes } from 'md4ai';
+import { renderContent, themes } from 'md4ai';
 import type { ThemeName } from 'md4ai';
 
-renderHTML(nodes, {
+renderContent(nodes, {
   theme: themes.violet.dark,
 });
 ```
@@ -328,7 +328,7 @@ function tokensToCSSVars(tokens: Record<string, string | undefined>) {
 const theme = themes[themeName][isDark ? 'dark' : 'light'];
 
 <div style={tokensToCSSVars(theme)}>
-  {renderHTML(nodes, { theme })}
+  {renderContent(nodes, { theme })}
 </div>
 ```
 
@@ -337,7 +337,7 @@ const theme = themes[themeName][isDark ? 'dark' : 'light'];
 Pass any subset — unset tokens fall back to the CSS variables already on the page:
 
 ```tsx
-renderHTML(nodes, {
+renderContent(nodes, {
   theme: {
     accent: '#7c3aed',
     accentHover: '#6d28d9',
@@ -355,7 +355,7 @@ The library doesn't bundle a highlighter — pass any highlighter via the `highl
 ```tsx
 import hljs from 'highlight.js';
 
-renderHTML(nodes, {
+renderContent(nodes, {
   highlight: (code, lang) => {
     if (lang && hljs.getLanguage(lang)) {
       return hljs.highlight(code, { language: lang }).value;
@@ -376,7 +376,7 @@ Replace any built-in renderer with your own component:
 ```tsx
 import type { ComponentOverrides } from 'md4ai';
 
-renderHTML(nodes, {
+renderContent(nodes, {
   components: {
     // Leaf nodes receive raw props
     chart: ({ chartType, data }) => <MyChart type={chartType} data={data} />,
@@ -412,7 +412,7 @@ Returns `IRNode[]` — plain serializable JSON, framework-agnostic.
 
 Same signature as `parse`. Lenient about unclosed blocks at the end of the string — safe to call on every streaming chunk. Partial fences render as animated skeleton placeholders.
 
-### `renderHTML(nodes, options?)`
+### `renderContent(nodes, options?)`
 
 | Option | Type | Description |
 |--------|------|-------------|

@@ -179,7 +179,7 @@ export function RenderNode({ node }: { node: IRNode }) {
   }
 }
 
-export function renderHTML(nodes: IRNode[], options: RenderHTMLOptions = {}): React.ReactElement {
+export function renderContent(nodes: IRNode[], options: RenderHTMLOptions = {}): React.ReactElement {
   const bridgeCtx = {
     query: (key: string, params?: unknown) => options.store?.[key]?.(params),
     emit: (event: string, data?: unknown) => options.onEvent?.(event, data),

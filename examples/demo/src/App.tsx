@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { parse, parseStreaming, renderHTML, themes } from 'md4ai';
+import { parse, parseStreaming, renderContent, themes } from 'md4ai';
 import type { ThemeName } from 'md4ai';
 import { DEFAULT_CONTENT } from './defaultContent.js';
 import { BRIDGES } from './bridges.js';
@@ -92,7 +92,7 @@ export default function App() {
     const parser = isStreaming ? parseStreaming : parse;
     try {
       const ir = parser(text, { bridges: BRIDGES });
-      return renderHTML(ir, { highlight: HIGHLIGHT, theme: themeTokens, bridges: BRIDGES });
+      return renderContent(ir, { highlight: HIGHLIGHT, theme: themeTokens, bridges: BRIDGES });
     } catch (e) {
       return <pre style={{ color: 'red' }}>{String(e)}</pre>;
     }

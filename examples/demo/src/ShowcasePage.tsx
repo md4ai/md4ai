@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { parseStreaming, renderHTML, themes } from 'md4ai';
+import { parseStreaming, renderContent, themes } from 'md4ai';
 import { BRIDGES } from './bridges.js';
 import { SHOWCASE_CONTENT } from './showcaseContent.js';
 import hljs from 'highlight.js';
@@ -59,7 +59,7 @@ export default function ShowcasePage() {
   const rendered = useMemo(() => {
     if (!text) return null;
     try {
-      return renderHTML(parseStreaming(text, { bridges: BRIDGES }), {
+      return renderContent(parseStreaming(text, { bridges: BRIDGES }), {
         highlight: HIGHLIGHT, theme, bridges: BRIDGES,
         onEvent: (event, data) => {
           if (event === 'pay') alert('Payment initiated: ' + JSON.stringify(data));

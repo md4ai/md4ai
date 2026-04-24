@@ -1,0 +1,56 @@
+{
+  "name": "md4ai",
+  "version": "0.1.0",
+  "description": "AI-friendly rich markdown renderer — extended markdown syntax that renders to interactive UI",
+  "type": "module",
+  "main": "./dist/md4ai.umd.cjs",
+  "module": "./dist/md4ai.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/md4ai.js",
+      "require": "./dist/md4ai.umd.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build && tsc --emitDeclarationOnly --declarationDir dist",
+    "dev": "cd examples/demo && npm run dev",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "markdown",
+    "ai",
+    "renderer",
+    "react",
+    "rich-text"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "chart.js": ">=4"
+  },
+  "peerDependenciesMeta": {
+    "chart.js": { "optional": true }
+  },
+  "dependencies": {
+    "remark-directive": "^3.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.1",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "chart.js": "^4.4.9",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.4",
+    "vite-plugin-dts": "^4.5.4"
+  }
+}

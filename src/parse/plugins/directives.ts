@@ -32,6 +32,16 @@ const plugin: Plugin<[], Root> = () => (tree) => {
     } else if (n.name === 'input') {
       const { type: inputType = 'text', ...rest } = n.attributes ?? {};
       richNode = { type: 'input', data: { inputType, props: rest } };
+    } else if (n.name === 'kpi') {
+      richNode = {
+        type: 'kpi',
+        data: {
+          label: n.attributes?.label ?? 'Metric',
+          value: n.attributes?.value ?? '—',
+          change: n.attributes?.change,
+          period: n.attributes?.period,
+        },
+      };
     } else if (n.name === 'card') {
       richNode = {
         type: 'card',

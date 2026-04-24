@@ -1,5 +1,5 @@
 import React from 'react';
-import { defineBridge } from 'md4ai';
+import { defineBridge } from 'md4ai/core';
 
 // ── @status[value] ────────────────────────────────────────────────────────────
 // Simple colored pill — already in App.tsx, kept here for co-location

@@ -34,7 +34,11 @@ export function Inline({ nodes }: Props) {
           case 'bridge': {
             const bridge = bridges.find((b) => b.marker === node.marker);
             if (!bridge) return <span key={i} className="md4ai-bridge--unknown">@{node.marker}[{node.raw}]</span>;
-            return <React.Fragment key={i}>{bridge.render(node.data, bridgeCtx)}</React.Fragment>;
+            try {
+              return <React.Fragment key={i}>{bridge.render(node.data, bridgeCtx)}</React.Fragment>;
+            } catch {
+              return <span key={i} className="md4ai-bridge--unknown">@{node.marker}[{node.raw}]</span>;
+            }
           }
           default:
             return null;

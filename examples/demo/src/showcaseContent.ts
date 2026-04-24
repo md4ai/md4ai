@@ -2,6 +2,24 @@ export const SHOWCASE_CONTENT = `# Q1 2025 Business Review
 
 Here's your complete Q1 performance summary across all regions, with strategic recommendations for Q2.
 
+## Executive Snapshot
+
+::kpi{label="Total Revenue" value="$617k" change="+11%" period="QoQ"}
+::kpi{label="East Region" value="$167k" change="+18%" period="QoQ"}
+::kpi{label="APAC" value="$89k" change="+20%" period="QoQ"}
+::kpi{label="South Region" value="$98k" change="-7%" period="QoQ"}
+
+## Q2 Rollout Plan
+
+\`\`\`steps
+- [done] Reconcile Q1 finance and CRM numbers
+- [active] Investigate South SMB churn
+  Pricing sensitivity is the leading signal from exit surveys.
+- [active] Roll out the East enterprise playbook
+  Enablement sessions are already scheduled for next week.
+- [planned] Lock APAC hiring and support coverage
+\`\`\`
+
 ## Revenue Performance
 
 \`\`\`chart
@@ -22,13 +40,6 @@ Here's your complete Q1 performance summary across all regions, with strategic r
   ]
 }
 \`\`\`
-
-## Key Metrics
-
-@kpi[value: $617k, label: Total Revenue, change: +11%, period: QoQ]
-@kpi[value: $167k, label: East Region, change: +18%, period: QoQ]
-@kpi[value: $89k, label: APAC, change: +20%, period: QoQ]
-@kpi[value: $98k, label: South Region, change: -7%, period: QoQ]
 
 ## Regional Trends
 
@@ -57,6 +68,7 @@ APAC: @sparkline[22, 26, 31, 35, 41, 47]
 | West | $121k | +10% | $1.5M | Medium |
 | South | $98k | -7% | $1.2M | High |
 | APAC | $89k | +20% | $1.1M | Low |
+| Total | $617k | +11% | $7.5M | Stable |
 
 ## Monthly Trend
 
@@ -84,7 +96,13 @@ Promote the East AE playbook company-wide. Schedule a 2-hour session where the E
 
 ## Q2 Roadmap
 
-@timeline[South Retention: active, East Playbook Rollout: active, APAC Hiring: planned, West Pipeline Build: planned, Q2 Forecast Lock: planned]
+\`\`\`timeline
+South Retention | active | Retention offer and pricing analysis are in progress
+East Playbook Rollout | active
+APAC Hiring | planned
+West Pipeline Build | planned
+Q2 Forecast Lock | planned
+\`\`\`
 
 ---
 

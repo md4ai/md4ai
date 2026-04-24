@@ -12,6 +12,14 @@ export type InlineNode =
   | { type: 'bridge'; marker: string; raw: string; data: unknown };
 
 export type CalloutVariant = 'note' | 'warning' | 'tip' | 'danger' | 'info';
+export type StepStatus = 'done' | 'active' | 'planned' | 'blocked';
+export type StepsPresentation = 'steps' | 'timeline';
+
+export interface StepItem {
+  title: string;
+  status: StepStatus;
+  description?: string;
+}
 
 export type IRNode =
   | { type: 'paragraph'; children: InlineNode[] }
@@ -26,8 +34,10 @@ export type IRNode =
   | { type: 'video'; src: string }
   | { type: 'button'; label: string; href?: string; variant?: string }
   | { type: 'input'; inputType: string; props: Record<string, string> }
+  | { type: 'kpi'; label: string; value: string; change?: string; period?: string }
   | { type: 'layout'; columns: number; children: IRNode[][] }
-  | { type: 'card'; title?: string; children: IRNode[] };
+  | { type: 'card'; title?: string; children: IRNode[] }
+  | { type: 'steps'; items: StepItem[]; presentation: StepsPresentation };
 
 /**
  * Override renderers for specific node types.
@@ -47,8 +57,10 @@ export interface ComponentOverrides {
   video?: (props: { src: string }) => ReactElement | null;
   button?: (props: { label: string; href?: string; variant?: string }) => ReactElement | null;
   input?: (props: { inputType: string; props: Record<string, string> }) => ReactElement | null;
+  kpi?: (props: { label: string; value: string; change?: string; period?: string }) => ReactElement | null;
   card?: (props: { title?: string; children: ReactElement[] }) => ReactElement | null;
   layout?: (props: { columns: number; children: ReactElement[][] }) => ReactElement | null;
+  steps?: (props: { items: StepItem[]; presentation: StepsPresentation }) => ReactElement | null;
 }
 
 export interface ParseOptions {
@@ -58,7 +70,7 @@ export interface ParseOptions {
   bridges?: BridgeDefinition[];
 }
 
-export interface RenderHTMLOptions {
+export interface RenderContentOptions {
   /** Extra CSS class on the root wrapper element */
   className?: string;
   /**
@@ -93,3 +105,8 @@ export interface RenderHTMLOptions {
   /** Handle events emitted by bridge components */
   onEvent?: (event: string, data?: unknown) => void;
 }
+
+/**
+ * @deprecated Use RenderContentOptions.
+ */
+export type RenderHTMLOptions = RenderContentOptions;

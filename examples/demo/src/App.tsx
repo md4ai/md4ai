@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { parse, parseStreaming, renderContent, themes } from 'md4ai';
-import type { ThemeName } from 'md4ai';
-import { DEFAULT_CONTENT } from './defaultContent.js';
+import { parse, parseStreaming } from 'md4ai/core';
+import { renderContent, themes } from 'md4ai/react';
+import type { ThemeName } from 'md4ai/react';
+import { SAMPLE_CONTENTS } from './sampleContent.js';
 import { BRIDGES } from './bridges.js';
 import hljs from 'highlight.js';
 
@@ -46,7 +47,8 @@ function useDebounced<T>(value: T, delay: number): T {
 }
 
 export default function App() {
-  const [source, setSource] = useState(DEFAULT_CONTENT);
+  const [selectedSample, setSelectedSample] = useState(SAMPLE_CONTENTS[0].id);
+  const [source, setSource] = useState(SAMPLE_CONTENTS[0].content);
   const [isDark, setIsDark] = useState(false);
   const [themeName, setThemeName] = useState<ThemeName>('zinc');
   const [dragging, setDragging] = useState(false);
@@ -56,6 +58,7 @@ export default function App() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const isStreaming = streamingText !== null;
+  const activeSample = SAMPLE_CONTENTS.find((sample) => sample.id === selectedSample) ?? SAMPLE_CONTENTS[0];
 
   // Active theme tokens
   const themeTokens = themes[themeName][isDark ? 'dark' : 'light'];
@@ -85,6 +88,14 @@ export default function App() {
 
   useEffect(() => () => { if (streamRef.current) clearInterval(streamRef.current); }, []);
 
+  const loadSample = useCallback((sampleId: typeof SAMPLE_CONTENTS[number]['id']) => {
+    const sample = SAMPLE_CONTENTS.find((item) => item.id === sampleId);
+    if (!sample) return;
+    stopStream();
+    setSelectedSample(sampleId);
+    setSource(sample.content);
+  }, [stopStream]);
+
   const debouncedSource = useDebounced(source, 150);
 
   const rendered = useMemo(() => {
@@ -110,9 +121,16 @@ export default function App() {
   return (
     <div className="app" style={cssVars} onMouseMove={onMouseMove} onMouseUp={onMouseUp}>
       <header className="app-header">
-        <div className="app-header__logo">
-          <span className="app-header__logo-text">md4ai</span>
-          <span className="app-header__tagline">rich markdown for AI</span>
+        <div className="app-header__identity">
+          <div className="app-header__logo">
+            <span className="app-header__logo-text">md4ai</span>
+            <span className="app-header__tagline">rich markdown for AI</span>
+          </div>
+          <nav className="app-header__nav" aria-label="Primary">
+            <a href="./showcase.html">Showcase</a>
+            <a href="./docs.html">Docs</a>
+            <a href="https://github.com/architprasar/md4ai">GitHub</a>
+          </nav>
         </div>
 
         <div className="app-header__actions">
@@ -155,11 +173,51 @@ export default function App() {
         </div>
       </header>
 
+      <section className="playground-intro">
+        <div className="playground-intro__copy">
+          <span className="playground-intro__eyebrow">Playground</span>
+          <h1>Test real markdown workflows before you wire md4ai into your app.</h1>
+          <p>
+            Switch between realistic samples, stream partial responses, and compare source markdown
+            with the rendered output side by side.
+          </p>
+          <div className="playground-intro__code">import {'{ parse }'} from 'md4ai/core' + import {'{ renderContent }'} from 'md4ai/react'</div>
+        </div>
+        <div className="playground-intro__meta">
+          <div className="playground-stat">
+            <strong>{SAMPLE_CONTENTS.length}</strong>
+            <span>copy-ready scenarios</span>
+          </div>
+          <div className="playground-stat">
+            <strong>Streaming-safe</strong>
+            <span>handles partial blocks without blowing up</span>
+          </div>
+          <div className="playground-stat">
+            <strong>Extensible</strong>
+            <span>bridges, themes, and renderer overrides</span>
+          </div>
+        </div>
+      </section>
+
+      <section className="sample-rail" aria-label="Sample scenarios">
+        {SAMPLE_CONTENTS.map((sample) => (
+          <button
+            key={sample.id}
+            type="button"
+            className={`sample-chip${sample.id === selectedSample ? ' sample-chip--active' : ''}`}
+            onClick={() => loadSample(sample.id)}
+          >
+            <span className="sample-chip__label">{sample.label}</span>
+            <span className="sample-chip__description">{sample.description}</span>
+          </button>
+        ))}
+      </section>
+
       <div className="app-body" ref={containerRef}>
         <div className="pane pane--editor" style={{ width: `${splitPct}%` }}>
           <div className="pane__header">
             <span>Markdown</span>
-            <span className="pane__badge">source</span>
+            <span className="pane__badge">{activeSample.label.toLowerCase()}</span>
           </div>
           <textarea
             className="editor"

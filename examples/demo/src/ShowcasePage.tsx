@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { parseStreaming, renderContent, themes } from 'md4ai';
+import { parseStreaming } from 'md4ai/core';
+import { renderContent, themes } from 'md4ai/react';
 import { BRIDGES } from './bridges.js';
 import { SHOWCASE_CONTENT } from './showcaseContent.js';
 import hljs from 'highlight.js';
@@ -77,9 +78,16 @@ export default function ShowcasePage() {
         background: 'color-mix(in srgb, var(--bg) 82%, transparent)',
         backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--border)',
       }}>
-        <span style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.04em' }}>md4ai</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <span style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.04em' }}>md4ai</span>
+          <div style={{ display: 'flex', gap: '0.9rem', fontSize: '0.82rem' }}>
+            <a href="./docs.html" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Docs</a>
+            <a href="./index.html" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Playground</a>
+            <a href="https://github.com/architprasar/md4ai" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>GitHub</a>
+          </div>
+        </div>
         <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <a href="/index.html" style={{
+          <a href="./index.html" style={{
             fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)',
             textDecoration: 'none', padding: '0.3rem 0.7rem',
             border: '1px solid var(--border)', borderRadius: '0.4rem',
@@ -114,13 +122,28 @@ export default function ShowcasePage() {
           metrics, timelines, and payments — no prompt engineering required.
         </p>
 
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', flexWrap: 'wrap' as const, marginBottom: '1.5rem' }}>
+          {['charts', 'callouts', 'tables', 'steps', 'kpis', 'bridges'].map((item) => (
+            <span key={item} style={{
+              border: '1px solid var(--border)',
+              background: 'var(--surface)',
+              color: 'var(--text-muted)',
+              borderRadius: '9999px',
+              padding: '0.28rem 0.7rem',
+              fontSize: '0.74rem',
+              fontWeight: 600,
+              textTransform: 'capitalize',
+            }}>{item}</span>
+          ))}
+        </div>
+
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' as const }}>
           <code style={{
             background: 'var(--surface2)', border: '1px solid var(--border)',
             borderRadius: '0.5rem', padding: '0.5rem 1rem',
             fontSize: '0.875rem', fontWeight: 500, fontFamily: 'JetBrains Mono, monospace',
           }}>npm install md4ai</code>
-          <a href="https://github.com" style={{
+          <a href="https://github.com/architprasar/md4ai" style={{
             display: 'inline-flex', alignItems: 'center',
             background: 'var(--accent)', color: 'var(--bg)',
             borderRadius: '0.5rem', padding: '0.5rem 1.1rem',
@@ -189,7 +212,7 @@ export default function ShowcasePage() {
 
       <footer style={{ borderTop: '1px solid var(--border)', padding: '2rem', textAlign: 'center' as const, color: 'var(--text-muted)', fontSize: '0.8rem' }}>
         <strong style={{ color: 'var(--text)' }}>md4ai</strong> — MIT License ·{' '}
-        <a href="/index.html" style={{ color: 'var(--text-muted)' }}>Open dev tool</a>
+        <a href="./index.html" style={{ color: 'var(--text-muted)' }}>Open dev tool</a>
       </footer>
 
       <style>{`

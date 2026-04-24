@@ -117,6 +117,11 @@ function nodeToIR(node: AnyNode, bridges?: BridgeDefinition[]): IRNode | null {
       return { type: 'input', inputType: data.inputType, props: data.props };
     }
 
+    case 'kpi': {
+      const data = node.data as { label: string; value: string; change?: string; period?: string };
+      return { type: 'kpi', label: data.label, value: data.value, change: data.change, period: data.period };
+    }
+
     case 'layout': {
       const data = node.data as { columns: number; sectionTrees: AnyNode[][] };
       return {
@@ -129,6 +134,18 @@ function nodeToIR(node: AnyNode, bridges?: BridgeDefinition[]): IRNode | null {
     case 'card': {
       const data = node.data as { title?: string };
       return { type: 'card', title: data?.title, children: contentToIR(node.children as AnyNode[], bridges) };
+    }
+
+    case 'steps': {
+      const data = node.data as {
+        items?: { title: string; status: 'done' | 'active' | 'planned' | 'blocked'; description?: string }[];
+        presentation?: 'steps' | 'timeline';
+      };
+      return {
+        type: 'steps',
+        items: data.items ?? [],
+        presentation: data.presentation ?? 'steps',
+      };
     }
 
     default:

@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 
 export type BuiltinPattern = 'scalar' | 'array' | 'keyvalue' | 'range';
+export type BridgePattern<T = unknown> = BuiltinPattern | ((raw: string) => T);
 
 export interface BridgeRenderCtx {
   query: (key: string, params?: unknown) => unknown;
@@ -9,38 +10,47 @@ export interface BridgeRenderCtx {
 
 export interface BridgeDefinition<T = unknown> {
   marker: string;
-  pattern: BuiltinPattern | ((raw: string) => T);
+  pattern: BridgePattern<T>;
   render: (data: T, ctx: BridgeRenderCtx) => ReactElement | null;
   prompt: string;
   /** @internal */
   _parse: (raw: string) => T;
 }
 
-function applyPattern<T>(pattern: BuiltinPattern | ((raw: string) => T), raw: string): T {
+export const bridgePatterns = {
+  scalar: (raw: string) => raw.trim(),
+  array: (raw: string) => raw.split(',').map((s) => s.trim()).filter(Boolean),
+  keyvalue: (raw: string) => {
+    const result: Record<string, string> = {};
+    raw.split(',').forEach((pair) => {
+      const colon = pair.indexOf(':');
+      if (colon === -1) return;
+      result[pair.slice(0, colon).trim()] = pair.slice(colon + 1).trim();
+    });
+    return result;
+  },
+  range: (raw: string) => {
+    const match = raw.match(/^(.+?)\s*(?:→|->|to)\s*(.+)$/);
+    if (match) return { min: match[1].trim(), max: match[2].trim() };
+    return { raw };
+  },
+} as const;
+
+export function parseBridgeData<T>(pattern: BridgePattern<T>, raw: string): T {
   if (typeof pattern === 'function') return pattern(raw);
 
   switch (pattern) {
     case 'scalar':
-      return raw.trim() as T;
+      return bridgePatterns.scalar(raw) as T;
 
     case 'array':
-      return raw.split(',').map((s) => s.trim()).filter(Boolean) as T;
+      return bridgePatterns.array(raw) as T;
 
-    case 'keyvalue': {
-      const result: Record<string, string> = {};
-      raw.split(',').forEach((pair) => {
-        const colon = pair.indexOf(':');
-        if (colon === -1) return;
-        result[pair.slice(0, colon).trim()] = pair.slice(colon + 1).trim();
-      });
-      return result as T;
-    }
+    case 'keyvalue':
+      return bridgePatterns.keyvalue(raw) as T;
 
-    case 'range': {
-      const match = raw.match(/^(.+?)\s*(?:→|->|to)\s*(.+)$/);
-      if (match) return { min: match[1].trim(), max: match[2].trim() } as T;
-      return { raw } as T;
-    }
+    case 'range':
+      return bridgePatterns.range(raw) as T;
   }
 }
 
@@ -54,15 +64,31 @@ function autoPrompt(marker: string, pattern: BuiltinPattern | Function): string 
   }
 }
 
+function isValidMarker(marker: string): boolean {
+  return /^[a-z][a-z0-9-]*$/.test(marker);
+}
+
 export function defineBridge<T = string>(def: {
   marker: string;
-  pattern: BuiltinPattern | ((raw: string) => T);
+  pattern: BridgePattern<T>;
   render: (data: T, ctx: BridgeRenderCtx) => ReactElement | null;
   prompt?: string;
+  onParseError?: (raw: string, error: unknown) => T;
 }): BridgeDefinition<T> {
+  if (!isValidMarker(def.marker)) {
+    throw new Error(`Invalid bridge marker "${def.marker}". Markers must match /^[a-z][a-z0-9-]*$/.`);
+  }
+
   return {
     ...def,
     prompt: def.prompt ?? autoPrompt(def.marker, def.pattern),
-    _parse: (raw: string) => applyPattern(def.pattern, raw),
+    _parse: (raw: string) => {
+      try {
+        return parseBridgeData(def.pattern, raw);
+      } catch (error) {
+        if (def.onParseError) return def.onParseError(raw, error);
+        return raw as T;
+      }
+    },
   };
 }

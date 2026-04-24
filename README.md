@@ -24,7 +24,8 @@ md4ai takes a different approach: **extend markdown itself.** The AI writes mark
 ## Quickstart
 
 ```tsx
-import { parse, renderContent } from 'md4ai';
+import { parse } from 'md4ai/core';
+import { renderContent } from 'md4ai/react';
 
 function AIMessage({ content }: { content: string }) {
   return renderContent(parse(content));
@@ -34,13 +35,51 @@ function AIMessage({ content }: { content: string }) {
 For streaming responses — call on the full accumulated text every chunk:
 
 ```tsx
-import { parseStreaming, renderContent } from 'md4ai';
+import { parseStreaming } from 'md4ai/core';
+import { renderContent } from 'md4ai/react';
 
 function StreamingMessage({ text }: { text: string }) {
   // Safe mid-stream — unclosed fences render as placeholders, never throw
   return renderContent(parseStreaming(text));
 }
 ```
+
+If you want a clearer package boundary, use subpath imports:
+
+```tsx
+import { parse, parseStreaming, defineBridge } from 'md4ai/core';
+import { renderContent, themes } from 'md4ai/react';
+```
+
+`md4ai` still re-exports the full API for backwards compatibility, but `md4ai/core` and `md4ai/react` make the parser/renderer split explicit.
+
+---
+
+## Repository layout
+
+- `src/` — parser, IR, themes, bridges, and React renderer
+- `examples/demo/` — playground, docs page, and GitHub Pages demo
+- `test/` — parser and streaming regression tests
+- `docs/` — contributor-facing architecture notes
+
+---
+
+## Development
+
+```bash
+npm ci
+npm --prefix examples/demo ci
+npm run typecheck
+npm test
+npm run dev
+```
+
+- `npm run typecheck` validates the library source with TypeScript
+- `npm test` rebuilds the package and runs the Node-based regression suite
+- `npm run dev` starts the example app for manual QA
+- `npm run build:demo` builds the Pages-ready demo bundle
+
+Contributor workflow and review expectations live in [`CONTRIBUTING.md`](./CONTRIBUTING.md). A short system view of the parser and renderer pipeline lives in [`docs/architecture.md`](./docs/architecture.md). Production integration guidance for streaming, theming, bridges, and component overrides lives in [`docs/production.md`](./docs/production.md).
 
 ---
 
@@ -90,6 +129,38 @@ Fenced code block with `chart` lang. Uses Chart.js under the hood — install it
 Supported types: `bar` `line` `pie` `doughnut` `radar`
 
 During streaming, an animated skeleton placeholder renders until the JSON is complete — no raw JSON flash.
+
+---
+
+### Steps and timelines
+
+Use a fenced workflow block for AI-generated plans, checklists, and project updates. Both `steps` and `timeline` render the same first-class component.
+
+````markdown
+```steps
+- [done] Gather requirements
+  Confirm success criteria and edge cases
+- [active] Build parser support
+  Accept partial syntax during streaming
+- [planned] Add docs and demo examples
+```
+````
+
+Accepted formats are intentionally forgiving: `[done] Title`, `Title [done]`, `done: Title`, `Title: planned`, and `Title | active | extra detail` all work. Lines without a recognized status fall back to `planned`.
+
+---
+
+### KPI metrics
+
+Use a leaf directive for a single headline metric. It stays readable in plain text and is easy for LLMs to emit consistently.
+
+```markdown
+::kpi{label="Revenue" value="$167k" change="+18%" period="QoQ"}
+::kpi{label="Net Retention" value="108%" change="+4 pts" period="YoY"}
+::kpi{label="South Region" value="$98k" change="-7%" period="QoQ"}
+```
+
+`label` and `value` are the core fields. `change` and `period` are optional.
 
 ---
 
@@ -165,6 +236,23 @@ Standard GFM syntax — rendered with visual checkboxes.
 
 ---
 
+### Tables
+
+Standard GFM tables work out of the box. The built-in HTML renderer adds analytics-friendly defaults without changing markdown syntax: mostly numeric columns are right-aligned, dense tables tighten spacing automatically, summary rows like `Total` and `Average` are emphasized, and simple status/delta values get clearer visual treatment.
+
+```markdown
+| Region | Revenue | Change | Status |
+| --- | --- | --- | --- |
+| East | $167k | +18% | On track |
+| South | $98k | -7% | At risk |
+| APAC | $89k | +20% | Healthy |
+| Total | $354k | +11% | Stable |
+```
+
+This keeps AI-generated report tables readable on mobile and desktop, even when the model only emits plain markdown.
+
+---
+
 ## Bridge system
 
 Bridges let anyone map a custom `@marker[data]` inline syntax to any React component. The AI learns it from a single example in the system prompt. Publish bridges as `md4ai-bridge-*` npm packages to share with the ecosystem.
@@ -188,7 +276,7 @@ Project status: @timeline[Discovery: done, Design: done, Build: active, Launch: 
 ### Define a bridge
 
 ```tsx
-import { defineBridge } from 'md4ai';
+import { defineBridge } from 'md4ai/core';
 
 const statusBridge = defineBridge({
   marker: 'status',
@@ -198,6 +286,8 @@ const statusBridge = defineBridge({
   ),
 });
 ```
+
+`defineBridge()` now validates marker names up front, and if a custom parser throws, the token falls back to its raw payload instead of breaking `parse()`.
 
 ### Register it
 
@@ -251,6 +341,32 @@ defineBridge({
 });
 ```
 
+If you want to reuse the built-in parsers directly in your own helpers, `parseBridgeData()` is exported:
+
+```ts
+import { parseBridgeData } from 'md4ai/core';
+
+const tags = parseBridgeData('array', 'React, Vue, Angular');
+// → ['React', 'Vue', 'Angular']
+```
+
+For stricter custom parsing with a safe fallback:
+
+```ts
+const progressBridge = defineBridge({
+  marker: 'progress',
+  pattern: (raw) => {
+    const [done, total] = raw.split('/').map(Number);
+    if (!Number.isFinite(done) || !Number.isFinite(total) || total <= 0) {
+      throw new Error('Invalid progress payload');
+    }
+    return { done, total, pct: Math.round((done / total) * 100) };
+  },
+  onParseError: (raw) => ({ done: 0, total: 0, pct: 0, raw }),
+  render: ({ pct }) => <span>{pct}%</span>,
+});
+```
+
 ---
 
 ### Host data and events
@@ -293,6 +409,8 @@ defineBridge({
 
 The markdown never contains real prices. The AI writes `@stock[AAPL]` — your store resolves it at render time.
 
+If a bridge renderer throws at render time, md4ai falls back to showing the original `@marker[data]` token instead of breaking the message tree.
+
 ---
 
 ## Themes
@@ -300,8 +418,8 @@ The markdown never contains real prices. The AI writes `@stock[AAPL]` — your s
 Four built-in themes, each with light and dark variants. All use the same CSS variable system as shadcn — plug straight into your existing shadcn app.
 
 ```tsx
-import { renderContent, themes } from 'md4ai';
-import type { ThemeName } from 'md4ai';
+import { renderContent, themes } from 'md4ai/react';
+import type { ThemeName } from 'md4ai/react';
 
 renderContent(nodes, {
   theme: themes.violet.dark,
@@ -374,7 +492,7 @@ Works with highlight.js, Shiki, Prism, lowlight — anything that returns an HTM
 Replace any built-in renderer with your own component:
 
 ```tsx
-import type { ComponentOverrides } from 'md4ai';
+import type { ComponentOverrides } from 'md4ai/react';
 
 renderContent(nodes, {
   components: {
@@ -393,7 +511,7 @@ renderContent(nodes, {
 });
 ```
 
-All overridable keys: `paragraph` `heading` `code` `blockquote` `list` `table` `thematicBreak` `callout` `chart` `video` `button` `input` `card` `layout`
+All overridable keys: `paragraph` `heading` `code` `blockquote` `list` `table` `thematicBreak` `callout` `chart` `video` `button` `input` `card` `layout` `steps`
 
 ---
 
@@ -410,7 +528,9 @@ Returns `IRNode[]` — plain serializable JSON, framework-agnostic.
 
 ### `parseStreaming(markdown, options?)`
 
-Same signature as `parse`. Lenient about unclosed blocks at the end of the string — safe to call on every streaming chunk. Partial fences render as animated skeleton placeholders.
+Same signature as `parse`. Lenient about unclosed blocks at the end of the string — safe to call on every streaming chunk. Partial `steps` fences render immediately, with unfinished or unknown statuses falling back to `planned`.
+
+See [`docs/production.md`](./docs/production.md) for integration guidance around streaming updates and fallback expectations.
 
 ### `renderContent(nodes, options?)`
 
@@ -424,6 +544,8 @@ Same signature as `parse`. Lenient about unclosed blocks at the end of the strin
 | `onEvent` | `(event, data?) => void` | Handler for bridge `emit()` |
 | `className` | `string` | Extra class on the root wrapper |
 
+See [`docs/production.md`](./docs/production.md) for production patterns using `theme`, `components`, `store`, and `onEvent` together.
+
 ### `defineBridge(options)`
 
 | Option | Type | Description |
@@ -436,7 +558,7 @@ Same signature as `parse`. Lenient about unclosed blocks at the end of the strin
 ### `themes`
 
 ```ts
-import { themes } from 'md4ai';
+import { themes } from 'md4ai/react';
 // themes.zinc.light | themes.zinc.dark
 // themes.violet.light | themes.violet.dark
 // themes.rose.light | themes.rose.dark

@@ -1,5 +1,5 @@
 import React from 'react';
-import type { IRNode, RenderHTMLOptions } from '../../types.js';
+import type { IRNode, RenderContentOptions } from '../../types.js';
 import { RenderContext, useRenderCtx } from './context.js';
 import { Inline } from './components/Inline.js';
 import { Callout } from './components/Callout.js';
@@ -7,8 +7,11 @@ import { Chart } from './components/Chart.js';
 import { Video } from './components/Video.js';
 import { Button } from './components/Button.js';
 import { InputBlock } from './components/InputBlock.js';
+import { KPI } from './components/KPI.js';
 import { Card } from './components/Card.js';
 import { Layout } from './components/Layout.js';
+import { Steps } from './components/Steps.js';
+import { Table } from './components/Table.js';
 
 const THEME_VAR_MAP: Record<string, string> = {
   accent: '--accent',
@@ -25,7 +28,7 @@ const THEME_VAR_MAP: Record<string, string> = {
   mono: '--mono',
 };
 
-function themeToStyle(theme: RenderHTMLOptions['theme']): React.CSSProperties {
+function themeToStyle(theme: RenderContentOptions['theme']): React.CSSProperties {
   if (!theme) return {};
   return Object.fromEntries(
     Object.entries(theme)
@@ -114,22 +117,7 @@ export function RenderNode({ node }: { node: IRNode }) {
 
     case 'table': {
       if (C.table) return C.table({ head: node.head, rows: node.rows });
-      return (
-        <div className="md4ai-table-wrapper">
-          <table className="md4ai-table">
-            <thead>
-              <tr>{node.head.map((cell, i) => <th key={i}><Inline nodes={cell} /></th>)}</tr>
-            </thead>
-            <tbody>
-              {node.rows.map((row, i) => (
-                <tr key={i}>
-                  {row.map((cell, j) => <td key={j}><Inline nodes={cell} /></td>)}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      );
+      return <Table head={node.head} rows={node.rows} />;
     }
 
     case 'thematicBreak':
@@ -162,6 +150,11 @@ export function RenderNode({ node }: { node: IRNode }) {
       return <InputBlock inputType={node.inputType} props={node.props} />;
     }
 
+    case 'kpi': {
+      if (C.kpi) return C.kpi({ label: node.label, value: node.value, change: node.change, period: node.period });
+      return <KPI label={node.label} value={node.value} change={node.change} period={node.period} />;
+    }
+
     case 'card': {
       const kids = node.children.map((n, i) => <RenderNode key={i} node={n} />);
       if (C.card) return C.card({ title: node.title, children: kids });
@@ -174,12 +167,17 @@ export function RenderNode({ node }: { node: IRNode }) {
       return <Layout columns={node.columns} renderedChildren={cols} />;
     }
 
+    case 'steps': {
+      if (C.steps) return C.steps({ items: node.items, presentation: node.presentation });
+      return <Steps items={node.items} presentation={node.presentation} />;
+    }
+
     default:
       return null;
   }
 }
 
-export function renderContent(nodes: IRNode[], options: RenderHTMLOptions = {}): React.ReactElement {
+export function renderContent(nodes: IRNode[], options: RenderContentOptions = {}): React.ReactElement {
   const bridgeCtx = {
     query: (key: string, params?: unknown) => options.store?.[key]?.(params),
     emit: (event: string, data?: unknown) => options.onEvent?.(event, data),

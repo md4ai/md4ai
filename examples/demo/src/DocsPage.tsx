@@ -12,12 +12,15 @@ const NAV: { label: string; id: string; children?: { label: string; id: string }
     children: [
       { label: 'Callouts', id: 'callouts' },
       { label: 'Charts', id: 'charts' },
+      { label: 'Steps', id: 'steps' },
+      { label: 'KPI Metrics', id: 'kpi-metrics' },
       { label: 'Cards', id: 'cards' },
       { label: 'Layout', id: 'layout' },
       { label: 'Buttons', id: 'buttons' },
       { label: 'Inputs', id: 'inputs' },
       { label: 'Video', id: 'video' },
       { label: 'Task Lists', id: 'task-lists' },
+      { label: 'Tables', id: 'tables' },
     ],
   },
   {
@@ -223,10 +226,10 @@ export default function DocsPage() {
         borderBottom: '1px solid var(--border)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <a href="/showcase.html" style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.04em', color: 'var(--text)', textDecoration: 'none' }}>md4ai</a>
+          <a href="./showcase.html" style={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.04em', color: 'var(--text)', textDecoration: 'none' }}>md4ai</a>
           <nav style={{ display: 'flex', gap: '1rem' }}>
             {[['showcase.html', 'Demo'], ['index.html', 'Playground'], ['docs.html', 'Docs']].map(([href, label]) => (
-              <a key={href} href={`/${href}`} style={{
+              <a key={href} href={`./${href}`} style={{
                 fontSize: '0.83rem', fontWeight: href === 'docs.html' ? 600 : 400,
                 color: href === 'docs.html' ? 'var(--accent)' : 'var(--text-muted)',
                 textDecoration: 'none',
@@ -295,6 +298,41 @@ export default function DocsPage() {
           minWidth: 0,
         }}>
 
+          <section style={{
+            border: '1px solid var(--border)',
+            background: 'linear-gradient(180deg, color-mix(in srgb, var(--accent) 4%, var(--surface)) 0%, var(--surface) 100%)',
+            borderRadius: '1rem',
+            padding: '1.5rem 1.6rem',
+            marginBottom: '2rem',
+          }}>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              borderRadius: '9999px',
+              padding: '0.22rem 0.7rem',
+              border: '1px solid color-mix(in srgb, var(--accent) 18%, var(--border))',
+              color: 'var(--accent)',
+              background: 'color-mix(in srgb, var(--accent) 8%, var(--surface))',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              marginBottom: '1rem',
+            }}>Open source runtime markdown renderer</div>
+            <h1 style={{ fontSize: '2rem', lineHeight: 1.05, letterSpacing: '-0.05em', marginBottom: '0.85rem' }}>
+              Build rich AI response UIs without forcing models to emit JSON.
+            </h1>
+            <P>Use the parser from <IC>md4ai/core</IC>, render with <IC>md4ai/react</IC>, and keep your app in plain markdown all the way through streaming.</P>
+            <div style={{ display: 'flex', gap: '0.7rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+              <a href="./showcase.html" style={{ textDecoration: 'none', color: 'white', background: 'var(--accent)', padding: '0.55rem 0.95rem', borderRadius: '0.6rem', fontSize: '0.85rem', fontWeight: 600 }}>Open live demo</a>
+              <a href="./index.html" style={{ textDecoration: 'none', color: 'var(--text)', background: 'var(--surface)', border: '1px solid var(--border)', padding: '0.55rem 0.95rem', borderRadius: '0.6rem', fontSize: '0.85rem', fontWeight: 600 }}>Open playground</a>
+              <a href="https://github.com/architprasar/md4ai" style={{ textDecoration: 'none', color: 'var(--text-muted)', background: 'var(--surface)', border: '1px solid var(--border)', padding: '0.55rem 0.95rem', borderRadius: '0.6rem', fontSize: '0.85rem', fontWeight: 600 }}>GitHub</a>
+            </div>
+            <Code lang="tsx">{`import { parse, parseStreaming, defineBridge } from 'md4ai/core';
+import { renderContent, themes } from 'md4ai/react';`}</Code>
+          </section>
+
           {/* ── Getting Started ── */}
           <H2 id="getting-started">Getting Started</H2>
           <P>md4ai extends markdown syntax so AI responses automatically render as rich UI components — charts, callouts, KPI cards, payment forms, and more. No prompt engineering, no JSON schemas. The AI writes markdown; md4ai renders it.</P>
@@ -308,14 +346,16 @@ npm install chart.js`}</Code>
 
           {/* ── Quickstart ── */}
           <H2 id="quickstart">Quickstart</H2>
-          <Code lang="tsx">{`import { parse, renderContent } from 'md4ai';
+          <Code lang="tsx">{`import { parse } from 'md4ai/core';
+import { renderContent } from 'md4ai/react';
 
 function AIMessage({ content }: { content: string }) {
   return renderContent(parse(content));
 }`}</Code>
 
           <P>For streaming responses, call <IC>parseStreaming</IC> on the full accumulated text every chunk. Unclosed fences render as animated skeletons — never throw.</P>
-          <Code lang="tsx">{`import { parseStreaming, renderContent } from 'md4ai';
+          <Code lang="tsx">{`import { parseStreaming } from 'md4ai/core';
+import { renderContent } from 'md4ai/react';
 
 function StreamingMessage({ text }: { text: string }) {
   return renderContent(parseStreaming(text));
@@ -324,6 +364,16 @@ function StreamingMessage({ text }: { text: string }) {
           <Callout type="tip">
             Both <IC>parse</IC> and <IC>parseStreaming</IC> return the same <IC>IRNode[]</IC> type and accept the same options. The only difference is leniency with unclosed blocks.
           </Callout>
+
+          <Table
+            head={['Start here', 'Why it matters']}
+            rows={[
+              ['<a href="./showcase.html">Showcase demo</a>', 'See a finished AI response rendered with charts, tables, KPIs, and timelines'],
+              ['<a href="./index.html">Playground</a>', 'Paste your own markdown or switch between realistic presets'],
+              ['<code>md4ai/core</code>', 'Parser, streaming, bridges, and IR types without renderer coupling'],
+              ['<code>md4ai/react</code>', 'Renderer, themes, and component override surface for React apps'],
+            ]}
+          />
 
           {/* ── Syntax ── */}
           <H2 id="syntax">Syntax Reference</H2>
@@ -373,6 +423,31 @@ function StreamingMessage({ text }: { text: string }) {
 \`\`\``}</Code>
           <P>Supported types: <IC>bar</IC> <IC>line</IC> <IC>pie</IC> <IC>doughnut</IC> <IC>radar</IC></P>
           <Callout type="note">chart.js must be installed separately: <IC>npm install chart.js</IC>. If it is missing, chart fences render as a skeleton placeholder.</Callout>
+
+          <H3 id="steps">Steps and Timelines</H3>
+          <P>Use <IC>steps</IC> or <IC>timeline</IC> fences for AI-generated workflows, plans, and progress reports. The parser accepts a few forgiving formats so models do not need to memorize a rigid schema.</P>
+          <Code>{`\`\`\`steps
+- [done] Gather requirements
+  Confirm success criteria and edge cases
+- [active] Build parser support
+  Accept partial syntax during streaming
+- [planned] Add docs and demo examples
+\`\`\`
+
+\`\`\`timeline
+Discovery | done
+Implementation | active | Parser and renderer are in progress
+QA | planned
+Launch: planned
+\`\`\``}</Code>
+          <P>Accepted forms include <IC>[done] Title</IC>, <IC>Title [done]</IC>, <IC>done: Title</IC>, <IC>Title: planned</IC>, and <IC>Title | active | detail</IC>. If a status is missing or malformed, the step still renders as <IC>planned</IC>.</P>
+
+          <H3 id="kpi-metrics">KPI Metrics</H3>
+          <P>Use <IC>::kpi</IC> for a first-class metric block. It is compact enough for model output, but still readable as plain text when rendered as raw markdown.</P>
+          <Code>{`::kpi{label="Revenue" value="$167k" change="+18%" period="QoQ"}
+::kpi{label="Net Retention" value="108%" change="+4 pts" period="YoY"}
+::kpi{label="South Region" value="$98k" change="-7%" period="QoQ"}`}</Code>
+          <P><IC>label</IC> and <IC>value</IC> are the main fields. <IC>change</IC> and <IC>period</IC> are optional metadata rendered as trend and badge UI.</P>
 
           <H3 id="cards">Cards</H3>
           <Code>{`:::card{title="Immediate action"}
@@ -427,6 +502,25 @@ https://www.youtube.com/watch?v=dQw4w9WgXcQ
 - [ ] Schedule South region review call
 - [ ] Draft Q2 forecast model`}</Code>
 
+          <H3 id="tables">Tables</H3>
+          <P>Standard GFM tables are supported directly. The built-in renderer improves them for report-style content by right-aligning mostly numeric columns, tightening dense layouts, emphasizing summary rows like <IC>Total</IC> and <IC>Average</IC>, and giving simple status or delta cells stronger visual cues.</P>
+          <Code>{`| Region | Revenue | Change | Status |
+| --- | --- | --- | --- |
+| East | $167k | +18% | On track |
+| South | $98k | -7% | At risk |
+| APAC | $89k | +20% | Healthy |
+| Total | $354k | +11% | Stable |`}</Code>
+          <Table
+            head={['Built-in behavior', 'What it helps with']}
+            rows={[
+              ['Numeric alignment', 'Revenue, deltas, rates, and percentages scan faster'],
+              ['Compact spacing', 'Wide analytics tables stay readable without custom styling'],
+              ['Summary row emphasis', 'Totals and averages stand out in model-generated reports'],
+              ['Status and delta highlighting', 'Positive/negative movement is easier to spot at a glance'],
+              ['Horizontal overflow handling', 'Tables remain usable on smaller screens'],
+            ]}
+          />
+
           {/* ── Bridges ── */}
           <H2 id="bridges">Bridge System</H2>
           <P>Bridges let anyone map a custom <IC>@marker[data]</IC> inline syntax to any React component. The AI learns it from a single example in the system prompt. Publish as <IC>md4ai-bridge-*</IC> npm packages to share with the community.</P>
@@ -436,7 +530,7 @@ https://www.youtube.com/watch?v=dQw4w9WgXcQ
           </Callout>
 
           <H3 id="bridge-define">Define a bridge</H3>
-          <Code lang="tsx">{`import { defineBridge } from 'md4ai';
+          <Code lang="tsx">{`import { defineBridge } from 'md4ai/core';
 
 const statusBridge = defineBridge({
   marker: 'status',           // matches @status[...]
@@ -473,7 +567,8 @@ const statusBridge = defineBridge({
 
           <H3 id="bridge-register">Register with parse and renderContent</H3>
           <P>Pass the same <IC>bridges</IC> array to both — the parser recognizes the markers, the renderer calls the right component.</P>
-          <Code lang="tsx">{`import { parse, renderContent } from 'md4ai';
+          <Code lang="tsx">{`import { parse } from 'md4ai/core';
+import { renderContent } from 'md4ai/react';
 
 const bridges = [statusBridge, kpiBridge, timelineBridge];
 
@@ -528,7 +623,7 @@ You are a helpful assistant.
           {/* ── Themes ── */}
           <H2 id="themes">Themes</H2>
           <P>Four built-in themes, each with light and dark variants. All use the same CSS variable names as shadcn — plug straight into an existing shadcn app.</P>
-          <Code lang="tsx">{`import { renderContent, themes } from 'md4ai';
+          <Code lang="tsx">{`import { renderContent, themes } from 'md4ai/react';
 
 // Use a preset
 renderContent(nodes, { theme: themes.violet.dark });
@@ -592,7 +687,7 @@ renderContent(nodes, {
           {/* ── Overrides ── */}
           <H2 id="overrides">Component Overrides</H2>
           <P>Replace any built-in renderer with your own component via the <IC>components</IC> option. Container nodes receive pre-rendered children as <IC>ReactElement[]</IC>.</P>
-          <Code lang="tsx">{`import type { ComponentOverrides } from 'md4ai';
+          <Code lang="tsx">{`import type { ComponentOverrides } from 'md4ai/react';
 
 renderContent(nodes, {
   components: {
@@ -615,14 +710,18 @@ renderContent(nodes, {
     code: ({ lang, value }) => (
       <SyntaxHighlighter language={lang}>{value}</SyntaxHighlighter>
     ),
+    steps: ({ items, presentation }) => (
+      <MyStepper items={items} variant={presentation} />
+    ),
   },
 });`}</Code>
-          <P>All overridable keys: <IC>paragraph</IC> <IC>heading</IC> <IC>code</IC> <IC>blockquote</IC> <IC>list</IC> <IC>table</IC> <IC>thematicBreak</IC> <IC>callout</IC> <IC>chart</IC> <IC>video</IC> <IC>button</IC> <IC>input</IC> <IC>card</IC> <IC>layout</IC></P>
+          <P>All overridable keys: <IC>paragraph</IC> <IC>heading</IC> <IC>code</IC> <IC>blockquote</IC> <IC>list</IC> <IC>table</IC> <IC>thematicBreak</IC> <IC>callout</IC> <IC>chart</IC> <IC>video</IC> <IC>button</IC> <IC>input</IC> <IC>kpi</IC> <IC>card</IC> <IC>layout</IC> <IC>steps</IC></P>
 
           {/* ── Streaming ── */}
           <H2 id="streaming">Streaming</H2>
           <P><IC>parseStreaming</IC> is a lenient wrapper around <IC>parse</IC>. It detects unclosed fenced blocks at the end of the string and auto-closes them before parsing. Call it on the full accumulated text on every chunk.</P>
-          <Code lang="tsx">{`import { parseStreaming, renderContent } from 'md4ai';
+          <Code lang="tsx">{`import { parseStreaming } from 'md4ai/core';
+import { renderContent } from 'md4ai/react';
 
 // Typical usage in an AI chat UI
 let accumulated = '';
@@ -638,6 +737,7 @@ for await (const chunk of stream) {
             rows={[
               ['Paragraph, heading, list', 'Renders as-is — partial text is fine'],
               ['<code>chart</code> fence', 'Animated shimmer skeleton until JSON is valid'],
+              ['<code>steps</code>, <code>timeline</code> fence', 'Partial lines render immediately; incomplete statuses fall back to <code>planned</code>'],
               ['<code>video</code> fence', 'Nothing until URL is complete'],
               ['<code>card</code>, <code>layout</code> directive', 'Renders with whatever content has arrived'],
               ['<code>@bridge[data]</code>', 'Renders when the closing <code>]</code> arrives'],

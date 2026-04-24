@@ -11,14 +11,24 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/md4ai.js",
       "require": "./dist/md4ai.umd.cjs"
+    },
+    "./core": {
+      "types": "./dist/core.d.ts",
+      "import": "./dist/core.js"
+    },
+    "./react": {
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "vite build && tsc --emitDeclarationOnly --declarationDir dist",
+    "build": "vite build && tsc -p tsconfig.runtime.json && tsc --emitDeclarationOnly --declarationDir dist",
+    "build:demo": "npm --prefix examples/demo run build",
     "dev": "cd examples/demo && npm run dev",
+    "test": "tsc -p tsconfig.test.json && node --test test/*.test.mjs",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [

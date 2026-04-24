@@ -2,6 +2,24 @@ export const DEFAULT_CONTENT = `# Q1 2025 Sales Analysis
 
 Here's a breakdown of your Q1 performance across regions, with key insights and recommended next steps.
 
+## Executive Snapshot
+
+::kpi{label="Total Revenue" value="$617k" change="+11%" period="QoQ"}
+::kpi{label="East Region" value="$167k" change="+18%" period="QoQ"}
+::kpi{label="South Region" value="$98k" change="-7%" period="QoQ"}
+
+## Q2 Delivery Plan
+
+\`\`\`steps
+- [done] Pull Q1 revenue data from CRM
+  Finance and RevOps totals are already reconciled.
+- [active] Review South churn drivers
+  Exit surveys point to pricing pressure in SMB.
+- [planned] Finalize APAC hiring plan
+  Two AE headcount requests are pending approval.
+- [planned] Publish Q2 forecast
+\`\`\`
+
 ## Revenue by Region
 
 \`\`\`chart
@@ -42,6 +60,7 @@ Here's a breakdown of your Q1 performance across regions, with key insights and 
 | West | $121k | +10% | New AE onboarding |
 | South | $98k | -7% | SMB churn |
 | APAC | $89k | +20% | New partnerships |
+| Total | $617k | +11% | Enterprise and APAC growth |
 
 ## Monthly Trend
 
@@ -103,17 +122,18 @@ https://www.youtube.com/embed/dQw4w9WgXcQ
 - [ ] Allocate 2 APAC AE headcount
 - [ ] Draft Q2 forecast model
 
-Here's a snapshot of where things stand:
+## Forecast Timeline
 
-@kpi[value: $167k, label: East Revenue, change: +18%, period: QoQ]
-@kpi[value: $98k, label: South Revenue, change: -7%, period: QoQ]
-@kpi[value: $89k, label: APAC Revenue, change: +20%, period: QoQ]
+\`\`\`timeline
+Data Pull | done
+Analysis | done
+Regional Review | active | South churn and APAC hiring are under review
+Forecast Lock | planned
+\`\`\`
 
 North monthly trend: @sparkline[44, 47, 51]
 East monthly trend: @sparkline[48, 61, 58]
 South monthly trend: @sparkline[38, 30, 30]
-
-Project status: @timeline[Data Pull: done, Analysis: done, Review: active, Forecast: planned]
 
 Want me to dig deeper into any region or build a Q2 forecast model?
 

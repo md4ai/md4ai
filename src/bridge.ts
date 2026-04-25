@@ -237,96 +237,98 @@ export function defineBridge<T>(def: {
     throw new Error(`Invalid bridge marker "${def.marker}". Markers must match /^[a-z][a-z0-9-]*$/.`);
   }
 
-  const pattern: BridgePattern<T> = def.pattern ?? 'keyvalue';
-  const prompt = def.fields
-    ? promptFromFields(def.marker, def.fields)
-    : (def.prompt ?? autoPrompt(def.marker, pattern));
+  const pattern = def.pattern || ('scalar' as BridgePattern<T>);
+  const prompt = def.prompt || (def.fields ? promptFromFields(def.marker, def.fields) : autoPrompt(def.marker, pattern));
 
   return {
     marker: def.marker,
-    fields: def.fields,
     pattern,
+    fields: def.fields,
     render: def.render,
     prompt,
     _parse: (raw: string) => {
-      const tokens = splitHybrid(raw);
-      const data: any = {};
-      const fields = def.fields || [];
-      let positionalIdx = 0;
- 
-      // Internal recursive parser for fields
-      const parseValue = (field: BridgeField<any>, rawVal: any): any => {
-        const meta = field.metadata;
-        const val = cleanToken(String(rawVal || ''));
- 
-        if (val === undefined || val === '') {
-          return meta.defaultValue;
+      try {
+        const fields = def.fields || [];
+        if (fields.length === 0) {
+          return parseBridgeData(pattern, raw);
         }
- 
-        if (meta.type === 'number') {
-          const num = Number(val);
-          return Number.isNaN(num) ? val : num;
-        }
-        if (meta.type === 'boolean') {
-          return val.toLowerCase() === 'true';
-        }
-        if (meta.type === 'enum') {
+        const tokens = splitHybrid(raw);
+        const data: any = {};
+        let positionalIdx = 0;
+
+        // Internal recursive parser for fields
+        const parseValue = (field: BridgeField<any>, rawVal: any): any => {
+          const meta = field.metadata;
+          const val = cleanToken(String(rawVal || ''));
+
+          if (val === undefined || val === '') {
+            return meta.defaultValue;
+          }
+
+          if (meta.type === 'number') {
+            const num = Number(val);
+            return Number.isNaN(num) ? val : num;
+          }
+          if (meta.type === 'boolean') {
+            return val.toLowerCase() === 'true';
+          }
+          if (meta.type === 'enum') {
+            return val;
+          }
+          if (meta.type === 'list') {
+            const originalRaw = String(rawVal || '').trim();
+            const isPiped = originalRaw.startsWith('|') && originalRaw.endsWith('|');
+            const delimiter = (isPiped && val.includes('|')) ? '|' : ',';
+            const items = val.split(delimiter).map((s) => s.trim()).filter(Boolean);
+            if (meta.itemType) {
+              return items.map((item) => parseValue(meta.itemType!, item));
+            }
+            return items;
+          }
+          if (meta.type === 'keyvalue') {
+            const originalRaw = String(rawVal || '').trim();
+            const isPiped = originalRaw.startsWith('|') && originalRaw.endsWith('|');
+            const delimiter = (isPiped && val.includes('|')) ? '|' : ',';
+            const kv: Record<string, string> = {};
+            val.split(delimiter).forEach((p) => {
+              const c = p.indexOf(':');
+              if (c !== -1) {
+                const k = cleanToken(p.slice(0, c));
+                const v = cleanToken(p.slice(c + 1));
+                kv[k] = v;
+              }
+            });
+            return kv;
+          }
           return val;
-        }
-        if (meta.type === 'list') {
-          const originalRaw = String(rawVal || '').trim();
-          const isPiped = originalRaw.startsWith('|') && originalRaw.endsWith('|');
-          const delimiter = (isPiped && val.includes('|')) ? '|' : ',';
-          const items = val.split(delimiter).map((s) => s.trim()).filter(Boolean);
-          if (meta.itemType) {
-            return items.map((item) => parseValue(meta.itemType!, item));
-          }
-          return items;
-        }
-        if (meta.type === 'keyvalue') {
-          const originalRaw = String(rawVal || '').trim();
-          const isPiped = originalRaw.startsWith('|') && originalRaw.endsWith('|');
-          const delimiter = (isPiped && val.includes('|')) ? '|' : ',';
-          const kv: Record<string, string> = {};
-          val.split(delimiter).forEach((p) => {
-            const c = p.indexOf(':');
-            if (c !== -1) {
-              const k = cleanToken(p.slice(0, c));
-              const v = cleanToken(p.slice(c + 1));
-              kv[k] = v;
-            }
-          });
-          return kv;
-        }
-        return val;
-      };
- 
-      tokens.forEach((token) => {
-        const colon = token.indexOf(':');
-        // Named field: key: val (ensure it's not inside |...| or "...")
-        if (colon !== -1 && !token.startsWith('|') && !token.startsWith('"')) {
-          const key = cleanToken(token.slice(0, colon));
-          const val = token.slice(colon + 1);
-          data[key] = val;
-        } else {
-          // Positional field
-          while (positionalIdx < fields.length) {
-            const field = fields[positionalIdx++];
-            if (data[field.metadata.name] === undefined) {
-              data[field.metadata.name] = token;
-              break;
+        };
+
+        tokens.forEach((token) => {
+          const colon = token.indexOf(':');
+          if (colon !== -1 && !token.startsWith('|') && !token.startsWith('"')) {
+            const key = cleanToken(token.slice(0, colon));
+            const val = token.slice(colon + 1);
+            data[key] = val;
+          } else {
+            while (positionalIdx < fields.length) {
+              const field = fields[positionalIdx++];
+              if (data[field.metadata.name] === undefined) {
+                data[field.metadata.name] = token;
+                break;
+              }
             }
           }
-        }
-      });
- 
-      // Post-process casting and defaults
-      const final: any = {};
-      fields.forEach((field) => {
-        final[field.metadata.name] = parseValue(field, data[field.metadata.name]);
-      });
- 
-      return final as T;
+        });
+
+        const final: any = {};
+        fields.forEach((field) => {
+          final[field.metadata.name] = parseValue(field, data[field.metadata.name]);
+        });
+
+        return final as T;
+      } catch (e) {
+        return raw as T;
+      }
     },
   };
 }

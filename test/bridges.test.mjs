@@ -159,7 +159,7 @@ test('getPrompt includes built-in md4ai syntax guidance by default', () => {
 
   assert.match(prompt, /standard markdown by default/i);
   assert.match(prompt, /GitHub-style callouts/i);
-  assert.match(prompt, /::kpi/);
+  assert.match(prompt, /@kpi/);
 });
 
 test('getPrompt minimal mode stays compact but keeps fallback guidance', () => {
@@ -169,9 +169,9 @@ test('getPrompt minimal mode stays compact but keeps fallback guidance', () => {
     includeBridgePrompts: false,
   });
 
-  assert.match(prompt, /Write normal markdown by default/i);
-  assert.match(prompt, /If unsure, fall back to plain markdown/i);
-  assert.match(prompt, /::kpi/);
+  assert.match(prompt, /Write standard markdown by default/i);
+  assert.match(prompt, /Never invent unsupported syntax/i);
+  assert.match(prompt, /@kpi/);
   assert.match(prompt, /```steps/);
   assert.doesNotMatch(prompt, /Example:/);
 });
@@ -184,8 +184,8 @@ test('getPrompt withExamples mode includes canonical examples', () => {
   });
 
   assert.match(prompt, /Example:/);
-  assert.match(prompt, /::kpi\{label="Revenue"/);
-  assert.match(prompt, /- \[done\] Gather requirements/);
+  assert.match(prompt, /@kpi\["Revenue"/);
+  assert.match(prompt, /- \[done\] Initial plan/);
 });
 
 test('getPrompt supports selecting only some built-in topics', () => {
@@ -195,7 +195,7 @@ test('getPrompt supports selecting only some built-in topics', () => {
     includeBridgePrompts: false,
   });
 
-  assert.match(prompt, /::kpi/);
+  assert.match(prompt, /@kpi/);
   assert.match(prompt, /markdown tables/i);
   assert.doesNotMatch(prompt, /GitHub-style callouts/i);
 });
@@ -230,7 +230,7 @@ test('getPrompt can combine built-ins with a selected subset of bridges', () => 
     includeBridges: ['payment'],
   });
 
-  assert.match(prompt, /::button/);
+  assert.match(prompt, /@button/);
   assert.match(prompt, /@payment/);
   assert.doesNotMatch(prompt, /@release/);
 });

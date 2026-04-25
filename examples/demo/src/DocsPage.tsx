@@ -68,7 +68,7 @@ export default function DocsPage() {
       />
 
       <div style={{ display: 'flex', paddingTop: 52 }}>
-        <aside style={{
+        <aside className="docs-sidebar" style={{
           position: 'fixed', top: 52, bottom: 0, left: 0, width: SIDEBAR_W, overflowY: 'auto',
           borderRight: '1px solid var(--border)', background: 'color-mix(in srgb, var(--surface) 94%, transparent)',
           padding: '1.1rem 0.85rem 1.5rem',
@@ -121,7 +121,7 @@ export default function DocsPage() {
           })}
         </aside>
 
-        <main style={{ marginLeft: SIDEBAR_W, flex: 1, maxWidth: 740, padding: '3rem 3rem 8rem', minWidth: 0, position: 'relative' }}>
+        <main className="docs-main" style={{ marginLeft: SIDEBAR_W, flex: 1, maxWidth: 740, padding: '3rem 3rem 8rem', minWidth: 0, position: 'relative' }}>
           <DocsHeroSection />
           <GettingStartedSection docsTheme={docsTheme} />
           <PromptingSection />
@@ -131,20 +131,7 @@ export default function DocsPage() {
         </main>
       </div>
 
-      <style>{`
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; background: var(--bg); }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 9999px; }
-        a { color: var(--accent); }
-        @media (max-width: 768px) {
-          aside { display: none; }
-          main { margin-left: 0 !important; padding: 2rem 1.25rem 4rem !important; }
-          .docs-demo__grid { grid-template-columns: 1fr !important; }
-          .docs-demo__editor { border-right: none !important; border-bottom: 1px solid var(--border); }
-        }
-      `}</style>
+
     </div>
   );
 }

@@ -1033,7 +1033,11 @@ export const tickerBridge = defineBridge({
               </span>
             )}
           </span>
-          <span style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '0.55rem' }}>
+          <span style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))',
+            gap: '0.55rem'
+          }}>
             <span style={{ border: '1px solid var(--border)', borderRadius: '0.8rem', padding: '0.7rem 0.8rem', background: 'var(--surface2)' }}>
               <span style={{ display: 'block', fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.22rem' }}>Price</span>
               <span style={{ display: 'block', fontSize: '1rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text)' }}>{price ?? '—'}</span>

@@ -115,7 +115,7 @@ export default function ShowcasePage() {
       />
 
       <section style={{ position: 'relative', padding: '4.75rem 2rem 3rem' }}>
-        <div style={{ maxWidth: 1180, margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0, 1.15fr) minmax(300px, 0.85fr)', gap: '1.5rem', alignItems: 'start' }}>
+        <div className="hero-grid" style={{ maxWidth: 1180, margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0, 1.15fr) minmax(300px, 0.85fr)', gap: '1.5rem', alignItems: 'start' }}>
           <div style={{ animation: 'md4ai-fade-up 0.7s var(--ease, cubic-bezier(0.16, 1, 0.3, 1)) both' }}>
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
@@ -129,7 +129,7 @@ export default function ShowcasePage() {
               Open-source markdown runtime for AI apps
             </div>
 
-            <h1 style={{ fontSize: 'clamp(2.45rem, 6vw, 4.8rem)', fontWeight: 850, letterSpacing: '-0.06em', lineHeight: 0.96, margin: '0 0 1rem', maxWidth: 760 }}>
+            <h1 className="hero-title" style={{ fontSize: 'clamp(2.45rem, 6vw, 4.8rem)', fontWeight: 850, letterSpacing: '-0.06em', lineHeight: 0.96, margin: '0 0 1rem', maxWidth: 760 }}>
               Plain markdown in.
               <br />
               Production UI out.
@@ -142,7 +142,7 @@ export default function ShowcasePage() {
               This showcase now mixes three richer use cases in one response: a trading terminal, an incident command center, and a revenue war room, each with domain-specific bridge components and external visualization libraries.
             </p>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' as const, marginBottom: '1rem' }}>
+            <div className="hero-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' as const, marginBottom: '1rem' }}>
               <a href="./docs.html" style={{
                 display: 'inline-flex', alignItems: 'center',
                 background: 'var(--accent)', color: 'var(--bg)',
@@ -191,30 +191,30 @@ export default function ShowcasePage() {
             background: 'color-mix(in srgb, var(--surface) 94%, transparent)',
             border: '1px solid var(--border)',
             borderRadius: '1.25rem',
-            padding: '1.1rem',
+            padding: '1.5rem',
             boxShadow: isDark
               ? '0 0 0 1px rgb(255 255 255 / 0.03), 0 24px 50px -28px rgb(0 0 0 / 0.85)'
               : '0 24px 54px -34px rgb(15 23 42 / 0.24)',
             animation: 'md4ai-fade-up 0.82s 0.08s var(--ease, cubic-bezier(0.16, 1, 0.3, 1)) both',
           }}>
-            <div style={{ display: 'grid', gap: '0.85rem' }}>
-              <div style={{ display: 'grid', gap: '0.3rem' }}>
-                <strong style={{ fontSize: '0.95rem', letterSpacing: '-0.03em' }}>Why teams reach for it</strong>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: 1.65 }}>
+            <div style={{ display: 'grid', gap: '1rem' }}>
+              <div style={{ display: 'grid', gap: '0.4rem' }}>
+                <strong style={{ fontSize: '1rem', letterSpacing: '-0.03em' }}>Why teams reach for it</strong>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>
                   md4ai sits between plain markdown renderers and heavy MDX-like setups. It keeps authoring simple while giving AI output enough structure to feel product-ready.
                 </p>
               </div>
-              <div style={{ display: 'grid', gap: '0.65rem' }}>
+              <div style={{ display: 'grid', gap: '0.75rem' }}>
                 {PILLARS.map((pillar, index) => (
                   <div key={pillar.title} style={{
                     border: '1px solid var(--border)',
                     background: 'var(--surface)',
                     borderRadius: '0.95rem',
-                    padding: '0.9rem 0.95rem',
+                    padding: '1rem',
                     animation: `md4ai-fade-up 0.7s ${0.16 + (index * 0.08)}s var(--ease, cubic-bezier(0.16, 1, 0.3, 1)) both`,
                   }}>
-                    <strong style={{ display: 'block', fontSize: '0.86rem', letterSpacing: '-0.02em', marginBottom: '0.2rem' }}>{pillar.title}</strong>
-                    <span style={{ display: 'block', color: 'var(--text-muted)', fontSize: '0.8rem', lineHeight: 1.55 }}>{pillar.copy}</span>
+                    <strong style={{ display: 'block', fontSize: '0.9rem', letterSpacing: '-0.02em', marginBottom: '0.25rem' }}>{pillar.title}</strong>
+                    <span style={{ display: 'block', color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: 1.5 }}>{pillar.copy}</span>
                   </div>
                 ))}
               </div>
@@ -347,11 +347,16 @@ export default function ShowcasePage() {
         @keyframes md4ai-fade-up { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
         @media (max-width: 980px) {
           nav { padding: 0 1rem !important; }
-          section > div[style*='grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr)'] { grid-template-columns: 1fr !important; }
-          section > div[style*='grid-template-columns: minmax(0, 0.88fr) minmax(300px, 0.52fr)'] { grid-template-columns: 1fr !important; }
+          .hero-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
         }
         @media (max-width: 720px) {
-          nav { height: auto !important; padding-top: 0.85rem !important; padding-bottom: 0.85rem !important; align-items: flex-start !important; gap: 0.8rem !important; flex-direction: column !important; }
+          nav { height: auto !important; padding-top: 1rem !important; padding-bottom: 1rem !important; align-items: center !important; gap: 1rem !important; flex-direction: column !important; }
+          .hero-title { font-size: 2.2rem !important; }
+          .showcase-stream { padding: 1.5rem 1.2rem !important; }
+        }
+        @media (max-width: 480px) {
+          .hero-actions { flex-direction: column; align-items: stretch !important; }
+          .hero-actions > * { width: 100%; justify-content: center; }
         }
         .md4ai-root { max-width: 100%; }
         .md4ai-h { font-weight: 700; line-height: 1.25; color: var(--text); margin-bottom: 0.5em; margin-top: 1.75em; letter-spacing: -0.02em; }

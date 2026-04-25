@@ -147,12 +147,7 @@ export default function TokenEfficiencyPage() {
 
       </main>
 
-      <style>{`
-        @media (max-width: 768px) {
-          .docs-demo__grid { grid-template-columns: 1fr !important; }
-          .docs-demo__editor { border-right: none !important; border-bottom: 1px solid var(--border); }
-        }
-      `}</style>
+
     </div>
   );
 }

@@ -10,6 +10,7 @@ const SIDEBAR_W = 240;
 export default function DocsPage() {
   const [isDark, setIsDark] = useStoredColorMode('dark');
   const [active, setActive] = useState('getting-started');
+  const [showNav, setShowNav] = useState(false);
 
   const flatNavIds = useMemo(
     () => DOCS_NAV.flatMap((section) => [section.id, ...(section.children?.map((child) => child.id) ?? [])]),
@@ -51,6 +52,8 @@ export default function DocsPage() {
     };
   }, [flatNavIds]);
 
+  const closeNav = () => setShowNav(false);
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', position: 'relative', overflowX: 'hidden', ...cssVars }}>
       <SiteBackdrop />
@@ -68,7 +71,16 @@ export default function DocsPage() {
       />
 
       <div style={{ display: 'flex', paddingTop: 52 }}>
-        <aside className="docs-sidebar" style={{
+        <div className="docs-mobile-nav" style={{ display: 'none' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)' }}>
+            {DOCS_NAV.find(s => s.id === active || s.children?.some(c => c.id === active))?.label ?? 'Documentation'}
+          </span>
+          <button className="menu-toggle" onClick={() => setShowNav(!showNav)}>
+            {showNav ? '✕' : '☰'}
+          </button>
+        </div>
+
+        <aside className={`docs-sidebar${showNav ? ' docs-sidebar--open' : ''}`} style={{
           position: 'fixed', top: 52, bottom: 0, left: 0, width: SIDEBAR_W, overflowY: 'auto',
           borderRight: '1px solid var(--border)', background: 'color-mix(in srgb, var(--surface) 94%, transparent)',
           padding: '1.1rem 0.85rem 1.5rem',
@@ -84,7 +96,7 @@ export default function DocsPage() {
                 background: sectionActive ? 'color-mix(in srgb, var(--accent) 4%, var(--surface))' : 'transparent',
                 padding: '0.3rem 0',
               }}>
-                <a href={`#${section.id}`} style={{
+                <a href={`#${section.id}`} onClick={closeNav} style={{
                   display: 'block', padding: '0.42rem 0.9rem',
                   fontSize: '0.82rem', fontWeight: sectionActive ? 700 : 600,
                   color: 'var(--text)', textDecoration: 'none', letterSpacing: '-0.01em',
@@ -95,6 +107,7 @@ export default function DocsPage() {
                       <a
                         key={child.id}
                         href={`#${child.id}`}
+                        onClick={closeNav}
                         style={{
                           display: 'block', padding: '0.38rem 0.55rem 0.38rem 1rem',
                           fontSize: '0.77rem', fontWeight: active === child.id ? 700 : 500,

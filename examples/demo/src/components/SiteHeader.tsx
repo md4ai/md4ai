@@ -18,6 +18,8 @@ export function SiteHeader({
   rightSlot?: React.ReactNode;
   position?: 'static' | 'sticky' | 'fixed';
 }) {
+  const [isOpen, setIsOpen] = React.useState(false);
+
   return (
     <header
       className="app-header"
@@ -79,7 +81,7 @@ export function SiteHeader({
           </span>
         </div>
         <nav
-          className="app-header__nav"
+          className={`app-header__nav${isOpen ? ' app-header__nav--open' : ''}`}
           aria-label="Primary"
           style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}
         >
@@ -113,8 +115,19 @@ export function SiteHeader({
           </a>
         </nav>
       </div>
+
+      <button
+        type="button"
+        className="menu-toggle"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-label="Toggle menu"
+        style={{ display: 'none' }}
+      >
+        {isOpen ? '✕' : '☰'}
+      </button>
+
       <div
-        className="app-header__actions"
+        className={`app-header__actions${isOpen ? ' app-header__actions--open' : ''}`}
         style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}
       >
         {rightSlot}

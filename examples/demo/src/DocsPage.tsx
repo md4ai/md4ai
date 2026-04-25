@@ -80,11 +80,7 @@ export default function DocsPage() {
           </button>
         </div>
 
-        <aside className={`docs-sidebar${showNav ? ' docs-sidebar--open' : ''}`} style={{
-          position: 'fixed', top: 52, bottom: 0, left: 0, width: SIDEBAR_W, overflowY: 'auto',
-          borderRight: '1px solid var(--border)', background: 'color-mix(in srgb, var(--surface) 94%, transparent)',
-          padding: '1.1rem 0.85rem 1.5rem',
-        }}>
+        <aside className={`docs-sidebar${showNav ? ' docs-sidebar--open' : ''}`}>
           {DOCS_NAV.map((section) => {
             const sectionActive = active === section.id || Boolean(section.children?.some((child) => child.id === active));
             return (
@@ -134,7 +130,7 @@ export default function DocsPage() {
           })}
         </aside>
 
-        <main className="docs-main" style={{ marginLeft: SIDEBAR_W, flex: 1, maxWidth: 740, padding: '3rem 3rem 8rem', minWidth: 0, position: 'relative' }}>
+        <main className="docs-main">
           <DocsHeroSection />
           <GettingStartedSection docsTheme={docsTheme} />
           <PromptingSection />

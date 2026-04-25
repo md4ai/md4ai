@@ -875,22 +875,27 @@ body {
 
   /* Docs & Efficiency shared responsive rules */
   .docs-sidebar {
-    display: block !important;
+    display: none !important; /* Fully hidden when closed */
     position: fixed !important;
     top: 52px !important;
-    left: -100% !important; /* Start off-screen */
+    left: 0 !important;
     bottom: 0 !important;
     width: 100% !important;
     z-index: 1000 !important;
     background: var(--bg) !important;
     padding: 1.5rem !important;
     padding-top: 64px !important;
-    transition: left 0.3s var(--ease) !important;
     border-right: none !important;
   }
   
   .docs-sidebar--open {
-    left: 0 !important; /* Slide in */
+    display: block !important;
+    animation: docs-slide-in 0.3s var(--ease) both;
+  }
+
+  @keyframes docs-slide-in {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
   }
 
   .docs-main {

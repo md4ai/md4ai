@@ -71,7 +71,7 @@ export default function DocsPage() {
       />
 
       <div style={{ display: 'flex', paddingTop: 52 }}>
-        <div className="docs-mobile-nav" style={{ display: 'none' }}>
+        <div className="docs-mobile-nav">
           <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text)' }}>
             {DOCS_NAV.find(s => s.id === active || s.children?.some(c => c.id === active))?.label ?? 'Documentation'}
           </span>

@@ -24,6 +24,41 @@ function CopyMCPButton() {
   );
 }
 
+function CopyLLMSTxtButton() {
+  const [copied, setCopied] = React.useState(false);
+
+  const onCopy = () => {
+    const url = `${window.location.origin}/llms.txt`;
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <button 
+      onClick={onCopy} 
+      className="btn-icon" 
+      style={{ background: copied ? 'var(--accent)' : 'transparent', color: copied ? 'white' : 'inherit' }}
+    >
+      {copied ? '✓ Copied URL' : '📄 Copy llms.txt'}
+    </button>
+  );
+}
+
+function DynamicMCPConfig() {
+  const command = "npx -y github:architprasar/md4ai";
+  return (
+    <Code>{`{
+  "mcpServers": {
+    "md4ai": {
+      "command": "node",
+      "args": ["${command}"]
+    }
+  }
+}`}</Code>
+  );
+}
+
 export const DOCS_NAV: { label: string; id: string; children?: { label: string; id: string }[] }[] = [
   { label: 'Getting Started', id: 'getting-started' },
   { label: 'Quickstart', id: 'quickstart' },
@@ -177,6 +212,7 @@ export function DocsHeroSection() {
             <a href="./index.html" className="btn-icon" style={{ textDecoration: 'none' }}>Open playground</a>
             <a href="https://github.com/architprasar/md4ai" className="btn-icon" style={{ textDecoration: 'none' }}>GitHub</a>
             <CopyMCPButton />
+            <CopyLLMSTxtButton />
           </div>
           <Code>{`import { parse, parseStreaming, defineBridge, B } from '@architprasar/md4ai/core';
 import { renderContent, themes } from '@architprasar/md4ai/react';`}</Code>
@@ -225,14 +261,7 @@ npm install chart.js`}</Code>
 
       <H3 id="mcp">Agent Support (MCP)</H3>
       <P>You can let your AI agent (Claude, etc.) automatically understand md4ai documentation and syntax by adding our Model Context Protocol (MCP) server. Click the <strong>Copy MCP</strong> button in the hero section to get the command, or add it manually to your configuration:</P>
-      <Code>{`{
-  "mcpServers": {
-    "md4ai": {
-      "command": "node",
-      "args": ["/path/to/md4ai/mcp-server.mjs"]
-    }
-  }
-}`}</Code>
+      <DynamicMCPConfig />
 
       <H2 id="quickstart">Quickstart</H2>
       <Code>{`import { parse, defineBridge, B } from '@architprasar/md4ai/core';

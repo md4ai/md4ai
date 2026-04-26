@@ -169,8 +169,8 @@ test('getPrompt minimal mode stays compact but keeps fallback guidance', () => {
     includeBridgePrompts: false,
   });
 
-  assert.match(prompt, /Write standard markdown by default/i);
-  assert.match(prompt, /Never invent unsupported syntax/i);
+  assert.match(prompt, /Write normal markdown by default/i);
+  assert.match(prompt, /Never invent unsupported directives or markers/i);
   assert.match(prompt, /@kpi/);
   assert.match(prompt, /```steps/);
   assert.doesNotMatch(prompt, /Example:/);
@@ -185,7 +185,7 @@ test('getPrompt withExamples mode includes canonical examples', () => {
 
   assert.match(prompt, /Example:/);
   assert.match(prompt, /@kpi\["Revenue"/);
-  assert.match(prompt, /- \[done\] Initial plan/);
+  assert.match(prompt, /- \[done\] Gather requirements/);
 });
 
 test('getPrompt supports selecting only some built-in topics', () => {

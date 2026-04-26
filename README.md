@@ -116,8 +116,8 @@ Detailed documentation and interactive playground are available at [architprasar
 
 ## Agent Support (MCP & llms.txt)
 md4ai is designed for AI native workflows.
-- **MCP Server**: Connect your agent with `npx -y github:architprasar/md4ai`.
-- **llms.txt**: Agents can find a concise map at [/llms.txt](https://architprasar.github.io/md4ai/llms.txt) or full context at [/llms-full.txt](https://architprasar.github.io/md4ai/llms-full.txt).
+- **MCP Server**: Connect your agent with `npx @architprasar/md4ai-mcp`.
+- **llms.txt**: Agents can find a concise map at [https://architprasar.github.io/md4ai/llms.txt](https://architprasar.github.io/md4ai/llms.txt) or full context at [https://architprasar.github.io/md4ai/llms-full.txt](https://architprasar.github.io/md4ai/llms-full.txt).
 
 ## Repository layout
 

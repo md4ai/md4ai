@@ -5,7 +5,7 @@ import { BRIDGES } from '../bridges.js';
 
 function CopyMCPButton() {
   const [copied, setCopied] = React.useState(false);
-  const command = 'npx -y github:architprasar/md4ai';
+  const command = 'npx @architprasar/md4ai-mcp';
 
   const onCopy = () => {
     navigator.clipboard.writeText(command);
@@ -46,7 +46,7 @@ function CopyLLMSTxtButton() {
 }
 
 function DynamicMCPConfig() {
-  const command = "npx -y github:architprasar/md4ai";
+  const command = "npx @architprasar/md4ai-mcp";
   return (
     <Code>{`{
   "mcpServers": {

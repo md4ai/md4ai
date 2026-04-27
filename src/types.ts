@@ -9,7 +9,7 @@ export type InlineNode =
   | { type: 'link'; href: string; children: InlineNode[] }
   | { type: 'image'; src: string; alt: string }
   | { type: 'break' }
-  | { type: 'bridge'; marker: string; raw: string; data: unknown };
+  | { type: 'bridge'; marker: string; raw: string; data: unknown; partial?: boolean };
 
 export type CalloutVariant = 'note' | 'warning' | 'tip' | 'danger' | 'info';
 export type StepStatus = 'done' | 'active' | 'planned' | 'blocked';
@@ -111,6 +111,11 @@ export interface RenderContentOptions {
   store?: Record<string, (params?: unknown) => unknown>;
   /** Handle events emitted by bridge components */
   onEvent?: (event: string, data?: unknown) => void;
+  /**
+   * Show shimmer skeleton placeholders while bridge tokens are still streaming.
+   * Set to false to disable all skeletons globally. Default: true
+   */
+  skeletons?: boolean;
 }
 
 /**

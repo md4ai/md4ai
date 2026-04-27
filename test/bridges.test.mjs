@@ -36,19 +36,7 @@ test('parse leaves emails, mentions, and unknown markers as plain text', () => {
   assert.equal(nodes.length, 1);
   assert.equal(nodes[0].type, 'paragraph');
   assert.deepEqual(nodes[0].children, [
-    {
-      type: 'text',
-      value: 'Email ',
-    },
-    {
-      type: 'link',
-      href: 'mailto:ops@example.com',
-      children: [{ type: 'text', value: 'ops@example.com' }],
-    },
-    {
-      type: 'text',
-      value: ', ping @john, keep @unknown[raw], and render ',
-    },
+    { type: 'text', value: 'Email ops@example.com, ping @john, keep @unknown[raw], and render ' },
     { type: 'bridge', marker: 'status', raw: 'pending', data: 'pending' },
     { type: 'text', value: '.' },
   ]);
@@ -184,7 +172,7 @@ test('getPrompt withExamples mode includes canonical examples', () => {
   });
 
   assert.match(prompt, /Example:/);
-  assert.match(prompt, /@kpi\["Revenue"/);
+  assert.match(prompt, /@kpi\[Revenue/);
   assert.match(prompt, /- \[done\] Gather requirements/);
 });
 

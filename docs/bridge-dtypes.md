@@ -102,9 +102,9 @@ const kpiBridge = defineBridge({
 ```
 
 ### Supported Syntax based on this schema:
-- **Positional**: `@kpi["Revenue", "$167k"]`
-- **Mixed**: `@kpi["Revenue", "$167k", trend: up]`
-- **Full Hybrid**: `@kpi["Revenue", "$167k", |SaaS, Q1|, trend: up]`
+- **Positional**: `@kpi[Revenue; $167k]`
+- **Mixed**: `@kpi[Revenue; $167k; trend=up]`
+- **Named**: `@kpi[label=Revenue; value=$167k; trend=up; tags=SaaS,Q1]`
 
 ---
 
@@ -117,12 +117,12 @@ This is a one-time instruction that teaches the AI the universal syntax for all 
 
 > ### Universal Bridge Syntax (@marker)
 > Use @marker[data] to insert rich components. Brackets `[...]` are ALWAYS mandatory.
-> 1. **Fields**: You can use positional arguments, named keys, or a mix of both.
->    - Positional: @marker["Value 1", "Value 2"]
->    - Named: @marker[key1: "Value 1", key2: "Value 2"]
->    - Hybrid: @marker["Value 1", key2: "Value 2"]
-> 2. **Lists**: Wrap multi-item lists in pipes to avoid comma clashing: @marker[|a, b, c|].
-> 3. **Smart Delimiters**: Inside |...|, use `|` as a separator if items contain commas (e.g., @marker[|id,label|id2,label|]).
+> 1. **Fields**: Use `;` to separate fields. Commas are for inner list items within a field.
+>    - Positional: @marker[Value 1; Value 2]
+>    - Named: @marker[key1=Value 1; key2=Value 2]
+>    - Mixed: @marker[Value 1; key2=Value 2]
+> 2. **Inner lists**: Comma-separate items within a field: @marker[a,b,c; next]
+> 3. **Quoting**: Only quote values that contain `;` or `=`: @marker["a;b"; next]
 > 4. **Spacing**: Ensure a space precedes the `@` symbol if it is mid-sentence.
 > 5. **No-Code**: NEVER emit bridges inside markdown code blocks or backticks.
 

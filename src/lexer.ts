@@ -1,9 +1,30 @@
 import { unquoteKV } from './bridge.js';
 
 /**
- * High-performance, single-pass lexer for the Hybrid Bridge Syntax.
- * Handles commas, pipe-lists (|...|), and quoted strings while being
- * resilient to unclosed containers (essential for streaming).
+ * Pipe lexer for the compact bridge syntax: @marker[val1; val2; key=val3]
+ *
+ * Splits on `;` respecting double-quoted strings. No markdown conflicts.
+ * Each token is either a bare positional value or `key=value`.
+ */
+export function splitSemi(str: string): string[] {
+  const parts: string[] = [];
+  let cur = '';
+  let inQuote = false;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i];
+    if (ch === '\\' && inQuote && i + 1 < str.length) { cur += ch + str[++i]; }
+    else if (ch === '"') { inQuote = !inQuote; cur += ch; }
+    else if (ch === ';' && !inQuote) { parts.push(cur.trim()); cur = ''; }
+    else { cur += ch; }
+  }
+  parts.push(cur.trim());
+  return parts.filter((p) => p !== '');
+}
+
+/**
+ * High-performance, single-pass lexer for the legacy bridge syntax.
+ * Handles commas, pipe-lists (|...|), and quoted strings.
+ * @deprecated Prefer splitSemi for new bridges.
  */
 export function splitHybrid(str: string): string[] {
   const parts: string[] = [];

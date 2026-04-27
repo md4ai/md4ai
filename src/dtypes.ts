@@ -1,5 +1,5 @@
 
-export type BridgeFieldType = 'string' | 'number' | 'boolean' | 'list' | 'enum' | 'keyvalue';
+export type BridgeFieldType = 'string' | 'number' | 'boolean' | 'list' | 'enum' | 'keyvalue' | 'records';
 
 export interface BridgeFieldMetadata<T = any> {
   name: string;
@@ -16,6 +16,8 @@ export interface BridgeFieldMetadata<T = any> {
   options?: string[];
   /** For list type */
   itemType?: BridgeField<any>;
+  /** For records type — sub-fields within each pipe-separated record */
+  recordFields?: BridgeField<any>[];
 }
 
 export abstract class BridgeField<T = any> {
@@ -96,6 +98,19 @@ class KeyValueField extends BridgeField<Record<string, string>> {
   constructor(name: string) { super(name, 'keyvalue'); }
 }
 
+/**
+ * A list of structured records.
+ * Syntax: field=val1,val2,val3|val1,val2,val3
+ * - | separates records from each other
+ * - , separates sub-fields within one record
+ */
+class RecordsField extends BridgeField<Record<string, any>[]> {
+  constructor(name: string, fields: BridgeField<any>[]) {
+    super(name, 'records');
+    this.metadata.recordFields = fields;
+  }
+}
+
 export const B = {
   string: (name: string) => new StringField(name),
   number: (name: string) => new NumberField(name),
@@ -103,6 +118,7 @@ export const B = {
   enum: <T extends string>(name: string, options: T[]) => new EnumField<T>(name, options),
   list: <T>(name: string, itemType: BridgeField<T>) => new ListField<T>(name, itemType),
   keyvalue: (name: string) => new KeyValueField(name),
+  records: (name: string, fields: BridgeField<any>[]) => new RecordsField(name, fields),
 };
 
 /** Utility to infer the data type from an array of BridgeFields */

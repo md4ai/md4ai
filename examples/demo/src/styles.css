@@ -590,6 +590,19 @@ body {
   100% { background-position: -200% 0; }
 }
 
+/* Skeleton shown while a bridge token is still streaming (partial: true) */
+.md4ai-bridge-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface2) 25%,
+    color-mix(in srgb, var(--border) 55%, var(--surface2)) 50%,
+    var(--surface2) 75%
+  );
+  background-size: 200% 100%;
+  animation: md4ai-shimmer 1.6s ease-in-out infinite;
+  border: 1px solid var(--border);
+}
+
 /* ── Video ── */
 .md4ai-video {
   margin-bottom: 1rem;

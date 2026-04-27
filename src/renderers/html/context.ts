@@ -9,12 +9,14 @@ export interface RenderCtx {
   highlight?: RenderContentOptions['highlight'];
   bridges: BridgeDefinition[];
   bridgeCtx: BridgeRenderCtx;
+  skeletons: boolean;
 }
 
 export const RenderContext = createContext<RenderCtx>({
   components: {},
   bridges: [],
   bridgeCtx: { query: () => undefined, emit: () => {} },
+  skeletons: true,
 });
 
 export const useRenderCtx = () => useContext(RenderContext);

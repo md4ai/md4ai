@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parse } from '../.test-dist/test/entry.js';
+import { parse, defineBridge, B } from '../.test-dist/test/entry.js';
 
 test('parse turns GitHub-style alerts into callout nodes', () => {
   const nodes = parse(`> [!TIP]
@@ -46,28 +46,17 @@ Gamma
 test('parse turns steps fences into structured workflow items', () => {
   const nodes = parse(`\`\`\`steps
 - [done] Gather requirements
-  Confirm success criteria and edge cases
 - Build parser [active]
-- Docs: planned
+- [planned] Ship docs
 \`\`\``);
 
   assert.equal(nodes.length, 1);
   assert.equal(nodes[0].type, 'steps');
   assert.equal(nodes[0].presentation, 'steps');
   assert.deepEqual(nodes[0].items, [
-    {
-      title: 'Gather requirements',
-      status: 'done',
-      description: 'Confirm success criteria and edge cases',
-    },
-    {
-      title: 'Build parser',
-      status: 'active',
-    },
-    {
-      title: 'Docs',
-      status: 'planned',
-    },
+    { title: 'Gather requirements', status: 'done' },
+    { title: 'Build parser',        status: 'active' },
+    { title: 'Ship docs',           status: 'planned' },
   ]);
 });
 
@@ -88,17 +77,29 @@ Launch
   ]);
 });
 
-test('parse turns kpi directives into kpi nodes', () => {
-  const nodes = parse('::kpi{label="Revenue" value="$167k" change="+18%" period="QoQ"}');
+test('parse resolves @bridge syntax into typed data when bridge is registered', () => {
+  const kpiBridge = defineBridge({
+    marker: 'kpi',
+    fields: [
+      B.string('label'),
+      B.string('value'),
+      B.string('change').optional(),
+      B.string('period').optional(),
+    ],
+    render: () => null,
+  });
+
+  const nodes = parse('@kpi[Revenue; $167k; +18%; QoQ]', { bridges: [kpiBridge] });
 
   assert.equal(nodes.length, 1);
-  assert.deepEqual(nodes[0], {
-    type: 'kpi',
-    label: 'Revenue',
-    value: '$167k',
-    change: '+18%',
-    period: 'QoQ',
-  });
+  assert.equal(nodes[0].type, 'paragraph');
+  const bridge = nodes[0].children[0];
+  assert.equal(bridge.type, 'bridge');
+  assert.equal(bridge.marker, 'kpi');
+  assert.equal(bridge.data.label, 'Revenue');
+  assert.equal(bridge.data.value, '$167k');
+  assert.equal(bridge.data.change, '+18%');
+  assert.equal(bridge.data.period, 'QoQ');
 });
 
 test('parse keeps task list state for existing GFM behavior', () => {

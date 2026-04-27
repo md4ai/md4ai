@@ -190,6 +190,7 @@ export function renderContent(nodes: IRNode[], options: RenderContentOptions = {
     highlight: options.highlight,
     bridges: options.bridges ?? [],
     bridgeCtx,
+    skeletons: options.skeletons !== false,
   };
 
   const style = themeToStyle(options.theme);

@@ -6,10 +6,10 @@ Here is the current roadmap state for the next two quarters, including delivery 
 
 ## Portfolio Snapshot
 
-::kpi{label="Roadmap Themes" value="4" change="+1" period="H2"}
-::kpi{label="Committed Initiatives" value="11" change="+3" period="Quarter"}
-::kpi{label="Launch Confidence" value="78%" change="-4 pts" period="Past 30 days"}
-::kpi{label="Critical Risks" value="3" change="+1" period="Current"}
+@kpi[Roadmap Themes; 4; +1; H2]
+@kpi[Committed Initiatives; 11; +3; Quarter]
+@kpi[Launch Confidence; 78%; -4 pts; Past 30 days]
+@kpi[Critical Risks; 3; +1; Current]
 
 ## Theme Allocation
 
@@ -45,8 +45,8 @@ Admin controls GA | planned
 - [planned] Launch admin controls GA
 \`\`\`
 
-::button[Export Roadmap Brief]{href="#" variant="primary"}
-::button[Open Delivery Review]{href="#" variant="secondary"}
+@button[Export Roadmap Brief; #; primary]
+@button[Open Delivery Review; #; secondary]
 `;
 
 const INCIDENT_REVIEW_CONTENT = `# Incident Review: Export Jobs Degradation
@@ -55,10 +55,10 @@ This is the post-incident summary for the export and reporting outage on April 1
 
 ## Severity Snapshot
 
-::kpi{label="Incident Duration" value="47 min" change="-18 min" period="vs prior Sev-1"}
-::kpi{label="Impacted Workspaces" value="214" change="+214" period="Window"}
-::kpi{label="Failed Export Jobs" value="1,832" change="+1,832" period="Incident"}
-::kpi{label="Customer Credits" value="$6.4k" change="+$6.4k" period="Issued"}
+@kpi[Incident Duration; 47 min; -18 min; vs prior Sev-1]
+@kpi[Impacted Workspaces; 214; +214; Window]
+@kpi[Failed Export Jobs; 1,832; +1,832; Incident]
+@kpi[Customer Credits; $6.4k; +$6.4k; Issued]
 
 ## Timeline
 

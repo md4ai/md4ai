@@ -84,7 +84,7 @@ function ModelCard({ result }: { result: any }) {
   const syntaxSaving = parseFloat(aggregate.avgOutputSavingPct || 0);
   
   const summaryMarkdown = `
-@kpi["Syntax Efficiency", "${syntaxSaving > 0 ? '+' : ''}${syntaxSaving}%", change: "${syntaxSaving > 0 ? 'smaller' : 'larger'}", period: "payload vs JSON"]
+@kpi[Syntax Efficiency; ${syntaxSaving > 0 ? '+' : ''}${syntaxSaving}%; ${syntaxSaving > 0 ? 'smaller' : 'larger'}; payload vs JSON]
 
 \`\`\`chart
 {

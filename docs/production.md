@@ -18,7 +18,7 @@ function AssistantMessage({ text }: { text: string }) {
 What it guarantees today:
 
 - Unclosed backtick fences are auto-closed before parsing.
-- Unclosed `:::card`-style directives are auto-closed before parsing.
+- Unclosed `@marker[` spans at the end of the text are dropped before parsing.
 - Incomplete `chart` fences resolve to a `chart` node with `data: null` so the UI can stay mounted.
 - Partial `video` and `layout` fences still parse into renderable nodes instead of throwing.
 

@@ -1,6 +1,6 @@
 # Bridge Authoring Guide
 
-Bridges are the heart of `md4ai`. They allow you to map custom inline syntax like `@marker[...]` to rich React components. 
+Bridges are the heart of `md4ai`. They allow you to map custom inline syntax like `@marker[...]` to rich React components.
 
 ---
 
@@ -8,8 +8,8 @@ Bridges are the heart of `md4ai`. They allow you to map custom inline syntax lik
 
 Instead of plain objects, md4ai uses a fluent **dType** API to define bridge fields. This gives you:
 1. **Recursive Parsing**: Lists can contain typed items (e.g., `B.list('scores', B.number())`).
-2. **Smart Delimiters**: Lists automatically switch to `|` separators if the items contain commas.
-3. **Key Sanitization**: Named fields support quoted or spaced keys for maximum robustness.
+2. **Named or positional**: AI can use positional shorthand or named `key=value` syntax.
+3. **Key Sanitization**: Named fields support quoted or spaced keys for robustness.
 4. **AI Guidance**: Descriptions and constraints are automatically baked into the system prompt.
 
 ### Basic Example
@@ -35,22 +35,31 @@ export const kpiBridge = defineBridge({
 
 ---
 
-## Hybrid Syntax Rules
+## Bridge Syntax Rules
 
-Every bridge supports three ways of being invoked by the AI:
+Every bridge uses `;` as the field separator. This avoids conflicts with markdown tables, blockquotes, and lists.
 
-1. **Positional**: `@kpi["Revenue", "$167k", up]`
-2. **Keyed**: `@kpi[label: "Revenue", value: "$167k", trend: up]`
-3. **Hybrid**: `@kpi["Revenue", "$167k", trend: up]`
+1. **Positional**: `@kpi[Revenue; $167k; up]`
+2. **Named**: `@kpi[label=Revenue; value=$167k; trend=up]`
+3. **Mixed**: `@kpi[Revenue; $167k; trend=up]`
 
-### The List Container (`|...|`)
-If a field is a list (`B.list()`), use `|...|` to wrap it.
+### Inner lists
+Use commas for list items **within** a single field:
 
-- **Simple List**: `@tags[|React, Vue, Angular|]` (uses `,` as separator)
-- **Complex List**: `@nodes[|id,Name,0,10|id2,Other,20,50|]` (uses `|` as separator because items contain commas)
+```markdown
+@agent[CodeSentinel; Reviewer; done; tools=AST,Semgrep,Coverage]
+@sparkline[38,41,45,49,58,62,71]
+```
 
-### Open Chars Resilience
-The parser is "Lenient by Design." It treats characters like `:` and `/` as part of the value unless they are at the top-level of a named field. This allows paths like `src/auth.ts:98` to work natively as "open chars" without mandatory quoting.
+### Quoting
+Only quote a value if it contains `;` or `=`:
+
+```markdown
+@kpi["Revenue; Q1"; $167k; +18%; QoQ]
+```
+
+### No-code rule
+Never emit bridges inside code fences or backticks — the parser skips them.
 
 ---
 
@@ -62,7 +71,7 @@ The parser is "Lenient by Design." It treats characters like `:` and `/` as part
 | `B.number(name)` | Numeric value. | Yes (casted) |
 | `B.boolean(name)` | `true`/`false` or `yes`/`no`. | Yes (casted) |
 | `B.enum(name, options)` | Restricts AI values. | Yes |
-| `B.list(name, type)` | Smart-delimiter list. | **Recursive** |
+| `B.list(name, type)` | Comma-separated list. | **Recursive** |
 | `B.keyvalue(name)` | Dictionary / Map. | **Recursive** |
 
 ### Field Attributes
@@ -81,12 +90,12 @@ md4ai uses a **Two-Tier** prompting system to keep token counts low.
 
 ### 1. The Protocol (Tier 1)
 Teaches the AI the universal bridge syntax once. Use `getBridgeProtocolPrompt()`.
-> Use `@marker[pos0, pos1, key: value, |list|]`. Brackets `[...]` are mandatory. Use `|...|` for lists. No bridges in code blocks.
+> Use `@marker[val1; val2; key=val3]`. Semicolons separate fields; commas for inner lists. No bridges in code blocks.
 
 ### 2. The Catalog (Tier 2)
 A compressed manifest of your registered bridges. Use `getPrompt({ bridges, mode: 'minimal' })`.
-> - kpi: [label, value, trend: up|down|neutral]
-> - servicemap: [title, nodes: |node|, edges: |edge|]
+> - @kpi[label, value, change?, period?]
+> - @servicemap[title?, note?, |nodes|, |edges|]
 
 To generate these prompts:
 ```ts

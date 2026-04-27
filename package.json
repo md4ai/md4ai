@@ -1,6 +1,6 @@
 {
   "name": "@architprasar/md4ai",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "AI-friendly rich markdown renderer — extended markdown syntax that renders to interactive UI",
   "type": "module",
   "main": "./dist/md4ai.umd.cjs",
@@ -66,13 +66,7 @@
     }
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
-    "remark-directive": "^3.0.1",
-    "remark-gfm": "^4.0.1",
-    "remark-parse": "^11.0.0",
-    "remark-rehype": "^11.1.1",
-    "unified": "^11.0.5",
-    "unist-util-visit": "^5.0.0"
+    "@modelcontextprotocol/sdk": "^1.29.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.23",

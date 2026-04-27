@@ -4,9 +4,9 @@ Here's a breakdown of your Q1 performance across regions, with key insights and 
 
 ## Executive Snapshot
 
-::kpi{label="Total Revenue" value="$617k" change="+11%" period="QoQ"}
-::kpi{label="East Region" value="$167k" change="+18%" period="QoQ"}
-::kpi{label="South Region" value="$98k" change="-7%" period="QoQ"}
+@kpi[Total Revenue; $617k; +11%; QoQ]
+@kpi[East Region; $167k; +18%; QoQ]
+@kpi[South Region; $98k; -7%; QoQ]
 
 ## Q2 Delivery Plan
 
@@ -78,13 +78,13 @@ Here's a breakdown of your Q1 performance across regions, with key insights and 
 
 ## Recommended Actions
 
-:::card{title="Immediate (this week)"}
-Schedule a call with the South region AEs to understand the SMB churn drivers. Pull exit survey data from the last 30 churned accounts before the call.
-:::
+@card[Immediate (this week)]
 
-:::card{title="This Quarter"}
+Schedule a call with the South region AEs to understand the SMB churn drivers. Pull exit survey data from the last 30 churned accounts before the call.
+
+@card[This Quarter]
+
 Allocate 2 additional AE headcount to APAC. East region momentum is self-sustaining — focus management attention on replicating that playbook in the West.
-:::
 
 ---
 
@@ -131,14 +131,14 @@ Regional Review | active | South churn and APAC hiring are under review
 Forecast Lock | planned
 \`\`\`
 
-North monthly trend: @sparkline[44, 47, 51]
-East monthly trend: @sparkline[48, 61, 58]
-South monthly trend: @sparkline[38, 30, 30]
+North monthly trend: @sparkline[44,47,51]
+East monthly trend: @sparkline[48,61,58]
+South monthly trend: @sparkline[38,30,30]
 
 Want me to dig deeper into any region or build a Q2 forecast model?
 
-::button[Export Report]{href="#" variant="primary"}
-::button[Build Q2 Forecast]{href="#" variant="secondary"}
+@button[Export Report; #; primary]
+@button[Build Q2 Forecast; #; secondary]
 
 ---
 
@@ -146,7 +146,7 @@ Want me to dig deeper into any region or build a Q2 forecast model?
 
 Advanced regional forecasting and AI-assisted deal scoring require a Pro plan.
 
-@payment[amount: $49, plan: Pro Monthly, desc: Unlimited regional forecasts, AI deal scoring, and priority support for your entire team]
+@payment[$49; Pro Monthly; desc=Unlimited regional forecasts, AI deal scoring, and priority support for your entire team]
 
-::input{type="text" placeholder="Ask a follow-up question..." label="Follow-up"}
+@input[Ask a follow-up question; text; What would you like to explore?]
 `;

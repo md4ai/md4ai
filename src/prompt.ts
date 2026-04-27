@@ -40,14 +40,14 @@ const BUILTIN_PROMPTS: Record<BuiltinPromptTopic, TopicPromptConfig> = {
     example: '```steps\n- [done] Gather requirements\n- [active] Build parser support\n  Accept partial syntax during streaming\n- [planned] Ship docs\n```',
   },
   kpi: {
-    minimal: 'For headline metrics, use @kpi["label", "value", change: "...", period: "..."].',
-    standard: 'Use @kpi["label", "value", change: "...", period: "..."] for headline metrics and stat cards. Keep labels short.',
-    example: '@kpi["Revenue", "$167k", change: "+18%", period: "QoQ"]',
+    minimal: 'For headline metrics, use @kpi[label; value; change; period].',
+    standard: 'Use @kpi[label; value; change; period] for headline metrics and stat cards. Keep labels short.',
+    example: '@kpi[Revenue; $167k; +18%; QoQ]',
   },
   cards: {
-    minimal: 'For highlighted summaries, use @card["title"] followed by content.',
-    standard: 'Use @card["title"] followed by a content block for highlights, focused action items, or recommendations.',
-    example: '@card["Immediate action"]\nSchedule a follow-up with the South region team.',
+    minimal: 'For highlighted summaries, use @card[title] followed by content.',
+    standard: 'Use @card[title] followed by a content block for highlights, focused action items, or recommendations.',
+    example: '@card[Immediate action]\nSchedule a follow-up with the South region team.',
   },
   layout: {
     minimal: 'For side-by-side summaries, use ```layout columns=2 blocks with --- separators.',
@@ -55,14 +55,14 @@ const BUILTIN_PROMPTS: Record<BuiltinPromptTopic, TopicPromptConfig> = {
     example: '```layout columns=2\n### Strengths\n- Clear enterprise pull\n\n---\n\n### Risks\n- Mobile parity is slipping\n```',
   },
   buttons: {
-    minimal: 'For actions, use @button["label", href: "...", variant: "primary|secondary|default"].',
-    standard: 'Use @button["label", href: "...", variant: "primary|secondary|default"] for call-to-action buttons.',
-    example: '@button["Export report", href: "#", variant: "primary"]',
+    minimal: 'For actions, use @button[label; href; variant] with variant: primary|secondary|default.',
+    standard: 'Use @button[label; href; variant] for call-to-action buttons. variant: primary | secondary | default.',
+    example: '@button[Export Report; #; primary]',
   },
   inputs: {
-    minimal: 'For follow-up fields, use @input["label", type: "text", placeholder: "..."].',
-    standard: 'Use @input["label", type: "text", placeholder: "..."] for lightweight prompt fields and follow-ups.',
-    example: '@input["Follow-up", type: "text", placeholder: "Ask a deeper question..."]',
+    minimal: 'For follow-up fields, use @input[label; type; placeholder].',
+    standard: 'Use @input[label; type; placeholder] for lightweight prompt fields and follow-ups.',
+    example: '@input[Follow-up; text; Ask a deeper question...]',
   },
   video: {
     minimal: 'For video embeds, use ```video fenced blocks with a video URL.',

@@ -19,7 +19,7 @@ The usual fix is prompt engineering — coerce the AI into outputting JSON, pars
 
 md4ai takes a different approach: **extend markdown itself.** The AI writes markdown. md4ai renders it as rich UI. No JSON. No custom formats. No prompt gymnastics.
 
-Another practical advantage: this often saves tokens compared to custom JSON UI schemas. Markdown plus compact directives like `::kpi{...}` or `@release[...]` is usually smaller than nested `type/props/content` JSON, and it also reduces repair-cost tokens from malformed structured output.
+Another practical advantage: this often saves tokens compared to custom JSON UI schemas. Markdown plus compact directives like `@kpi[Revenue; $167k; +18%; QoQ]` is usually smaller than nested `type/props/content` JSON, and it also reduces repair-cost tokens from malformed structured output.
 
 ## Bridge System (AI-Native Components)
 
@@ -56,10 +56,10 @@ const kpiBridge = defineBridge({
 
 The model can emit any of these; the parser handles them all:
 
-- **Positional**: `@kpi["Revenue", "$1.2M", 14]`
-- **Named**: `@kpi[label: "Revenue", value: "$1.2M", change: 14]`
-- **Hybrid**: `@kpi["Revenue", "$1.2M", change: 14]`
-- **Complex Lists**: `@sparkline[|10, 20, 15, 30, 25|]`
+- **Positional**: `@kpi[Revenue; $1.2M; +14%; QoQ]`
+- **Named**: `@kpi[label=Revenue; value=$1.2M; change=+14%; period=QoQ]`
+- **Mixed**: `@kpi[Revenue; $1.2M; change=+14%]`
+- **Inner lists**: `@sparkline[10,20,15,30,25]`
 
 ## Two-Tier Prompting
 
@@ -216,12 +216,10 @@ Accepted formats are intentionally forgiving: `[done] Title`, `Title [done]`, `d
 
 ### KPI metrics
 
-Use a leaf directive for a single headline metric. It stays readable in plain text and is easy for LLMs to emit consistently.
-
 ```markdown
-::kpi{label="Revenue" value="$167k" change="+18%" period="QoQ"}
-::kpi{label="Net Retention" value="108%" change="+4 pts" period="YoY"}
-::kpi{label="South Region" value="$98k" change="-7%" period="QoQ"}
+@kpi[Revenue; $167k; +18%; QoQ]
+@kpi[Net Retention; 108%; +4 pts; YoY]
+@kpi[South Region; $98k; -7%; QoQ]
 ```
 
 `label` and `value` are the core fields. `change` and `period` are optional.
@@ -231,9 +229,8 @@ Use a leaf directive for a single headline metric. It stays readable in plain te
 ### Cards
 
 ```markdown
-:::card{title="Immediate action"}
+@card[Immediate action]
 Schedule a call with South region AEs. Pull exit survey data first.
-:::
 ```
 
 ---
@@ -259,20 +256,18 @@ Schedule a call with South region AEs. Pull exit survey data first.
 ### Buttons
 
 ```markdown
-::button[Export Report]{href="#" variant="primary"}
-::button[Build Forecast]{href="#" variant="secondary"}
+@button[Export Report; #; primary]
+@button[Build Forecast; #; secondary]
 ```
 
 Variants: `primary` `secondary` `default`
-
-> **Note:** remark-directive attribute syntax uses spaces between attributes, not commas.
 
 ---
 
 ### Inputs
 
 ```markdown
-::input{type="text" placeholder="Ask a follow-up..." label="Follow-up"}
+@input[Follow-up; text; Ask a follow-up...]
 ```
 
 ---
@@ -309,52 +304,50 @@ md4ai ships 16 ready-made bridge markers for AI product surfaces. Use any of the
 **General purpose**
 
 ```markdown
-@kpi["Revenue", "$167k", change: +18%, period: QoQ]
- 
-@sparkline[|38, 41, 45, 49, 58, 62, 71|]
- 
-@timeline[|Discovery: done, Design: done, Build: active, Launch: planned|]
- 
-@release["zod v3.22", status: beta, eta: "Pinned at rc.2", owner: Platform]
- 
-@gauge["Checkout Processor", 61, max: 100, unit: %, warn: 75, crit: 65]
- 
-@signal["SQL injection", tone: critical, score: 9.4, trend: new, note: "Parameterized query required."]
- 
-@fileheat["47 files", |src/checkout/processor.ts:98:modified, src/auth/session.ts:71:added|]
- 
-@payment["$79", "CodeSentinel Pro", desc: "Automatic merge blocking and auto-fix PRs."]
+@kpi[Revenue; $167k; +18%; QoQ]
+
+@sparkline[38,41,45,49,58,62,71]
+
+@release[zod v3.22; beta; Pinned at rc.2; Platform]
+
+@gauge[Checkout Processor; 61; max=100; unit=%; warn=75; crit=65]
+
+@signal[SQL injection; critical; 9.4; note=Parameterized query required.]
+
+@fileheat[47 files; src/checkout/processor.ts:98:modified,src/auth/session.ts:71:added]
+
+@payment[$79; CodeSentinel Pro; desc=Automatic merge blocking and auto-fix PRs.]
 ```
 
 **AI agent surfaces**
 
 ```markdown
-@agent[name: CodeSentinel, role: Security Reviewer, status: done, latency: 4.2s, tools: AST Analysis|Semgrep, goal: Block insecure merges]
+@agent[CodeSentinel; Security Reviewer; done; tools=AST Analysis,Semgrep; goal=Block insecure merges]
 
-@command[title: Ops Console, stage: Live, owner: AI Ops, channels: PagerDuty|Slack, note: All clear.]
+@command[Ops Console; Live; owner=AI Ops; channels=PagerDuty,Slack]
 ```
 
 **Trading / market data**
 
 ```markdown
-@ticker[symbol: NVDA, price: $984.22, move: +3.8%, volume: 42.1M, range: 952-991]
+@ticker[NVDA; $984.22; +3.8%; 42.1M]
 
-@position[symbol: NVDA, side: long, entry: $902, target: $1025, stop: $864, size: 7.5%]
+@position[NVDA; long; entry=$902; target=$1025; stop=$864; size=7.5%]
 
-@trade[action: Buy on pullback, window: next 2 sessions, confidence: 78, status: active]
+@trade[Buy on pullback; window=next 2 sessions; confidence=78; status=active]
 
-@candles[symbol: NVDA; thesis: Support holding at $952; candles: 2026-04-21:910:956:905:948:36|2026-04-22:948:972:941:966:41]
+@candles[NVDA; thesis=Support holding at $952; candles=2026-04-21:910:956:905:948:36,2026-04-22:948:972:941:966:41]
 ```
 
 **Architecture / infra**
 
 ```markdown
-@servicemap[title: Checkout graph; nodes: api,API Layer,0,80,active|validator,Validator,220,0,done; edges: api>validator>validate]
+@servicemap[Checkout graph; nodes=api,API Layer,0,80,active; edges=api>validator>validate]
 
-@pipelineflow[title: Q2 Pipeline; stages: Sourced,$2.8M,182,done|Qualified,$1.7M,96,active|Proposal,$740k,41,planned]
+@pipelineflow[Q2 Pipeline; stages=Sourced,$2.8M,182,done]
 ```
 
-Bridge markers that use semicolons as field delimiters (`candles`, `servicemap`, `pipelineflow`) do so because their values contain commas internally. See [`docs/bridges.md`](./docs/bridges.md) for all fields and formats.
+See [`docs/bridges.md`](./docs/bridges.md) for all fields and formats.
 
 ---
 
@@ -384,11 +377,11 @@ Bridges let anyone map a custom `@marker[data]` inline syntax to any React compo
 ```
 The build is @status[passing] with @num[142] tests.
 
-Top markets this quarter: @tags[East, North, APAC]
+Top markets this quarter: @tags[East,North,APAC]
 
-@kpi[value: $167k, label: East Revenue, change: +18%, period: QoQ]
+@kpi[East Revenue; $167k; +18%; QoQ]
 
-Project status: @timeline[Discovery: done, Design: done, Build: active, Launch: planned]
+@release[Agent Inbox; beta; July 2026; Core UX]
 ```
 
 `@` only fires when followed by `word[` — bare mentions like `@john` and emails like `user@company.com` are never matched.
@@ -495,8 +488,8 @@ const examplePrompt = getPrompt({
 | Pattern | Markdown | Parsed as |
 |---------|----------|-----------|
 | `scalar` | `@badge[success]` | `"success"` |
-| `array` | `@tags[React, Vue, Angular]` | `["React", "Vue", "Angular"]` |
-| `keyvalue` | `@kpi[value: $167k, label: Revenue]` | `{ value: "$167k", label: "Revenue" }` |
+| `array` | `@tags[React,Vue,Angular]` | `["React", "Vue", "Angular"]` |
+| `keyvalue` | `@kpi[label=Revenue; value=$167k]` | `{ label: "Revenue", value: "$167k" }` |
 | `range` | `@range[100 → 500]` | `{ min: "100", max: "500" }` |
 
 For custom parsing, pass a function:

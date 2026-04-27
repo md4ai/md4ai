@@ -14,7 +14,7 @@ const EXAMPLES = [
   "change": "+18%",
   "period": "QoQ"
 }`,
-    markdown: `::kpi{label="Revenue" value="$167k" change="+18%" period="QoQ"}`,
+    markdown: `@kpi[Revenue; $167k; +18%; QoQ]`,
     takeaway: 'Compact directive removes repeated keys and wrapper overhead.',
   },
   {
@@ -26,7 +26,7 @@ const EXAMPLES = [
   "eta": "July 2026",
   "owner": "Core UX"
 }`,
-    markdown: `@release[name: Agent Inbox, status: beta, eta: July 2026, owner: Core UX]`,
+    markdown: `@release[Agent Inbox; beta; July 2026; Core UX]`,
     takeaway: 'Bridge markers stay short while still carrying UI-ready metadata.',
   },
   {
@@ -38,8 +38,8 @@ const EXAMPLES = [
     { "type": "button", "label": "Open review", "variant": "secondary", "href": "/review" }
   ]
 }`,
-    markdown: `::button[Export report]{href="#" variant="primary"}
-::button[Open review]{href="/review" variant="secondary"}`,
+    markdown: `@button[Export report; #; primary]
+@button[Open review; /review; secondary]`,
     takeaway: 'Repeated UI elements stay readable without nested arrays and wrappers.',
   },
   {
@@ -58,7 +58,7 @@ const EXAMPLES = [
 > [!NOTE]
 > East region leads growth.
 
-::kpi{label="Revenue" value="$167k" change="+18%"}
+@kpi[Revenue; $167k; +18%]
 
 | Region | Status |
 | --- | --- |

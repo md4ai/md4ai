@@ -140,12 +140,12 @@ Implementation | active | Core renderer work is already in review
 QA | planned
 Launch | planned
 \`\`\``,
-  kpis: `@kpi["Quarterly Revenue", "$2.48M", change: "+14%", period: "QoQ"]
-@kpi["Net Retention", "112%", change: "+3 pts", period: "YoY"]
-@kpi["Launch Confidence", "78%", change: "-4 pts", period: "30 days"]`,
-  cards: `@card["Immediate action"]
+  kpis: `@kpi[Quarterly Revenue; $2.48M; +14%; QoQ]
+@kpi[Net Retention; 112%; +3 pts; YoY]
+@kpi[Launch Confidence; 78%; -4 pts; 30 days]`,
+  cards: `@card[Immediate action]
 Prioritize the mobile parity recovery plan before adding new roadmap scope.
-@card["Leadership note"]
+@card[Leadership note]
 Reporting foundations are the dependency for three separate launches.`,
   layout: `\`\`\`layout columns=2
 ### Strengths
@@ -158,11 +158,11 @@ Reporting foundations are the dependency for three separate launches.`,
 - Mobile parity is slipping
 - Export job reliability still needs follow-up
 \`\`\``,
-  buttons: `@button["Export roadmap brief", href: "#", variant: "primary"]
-@button["Open delivery review", href: "#", variant: "secondary"]
-@button["Download CSV", href: "#", variant: "default"]
+  buttons: `@button[Export roadmap brief; #; primary]
+@button[Open delivery review; #; secondary]
+@button[Download CSV; #; default]
 
-@input["Follow-up", type: "text", placeholder: "Ask for a deeper breakdown..."]`,
+@input[Follow-up; text; Ask for a deeper breakdown...]`,
   video: `\`\`\`video
 https://www.youtube.com/watch?v=dQw4w9WgXcQ
 \`\`\``,
@@ -176,15 +176,15 @@ https://www.youtube.com/watch?v=dQw4w9WgXcQ
 | Reporting Foundations | Platform | 76% | Active |
 | Mobile Parity | Mobile | 61% | At risk |
 | Total | Product Org | 78% | Stable |`,
-  bridge: `The next release is @release["Agent Inbox", beta, eta: "July 2026", owner: "Core UX"].
- 
-If launch confidence drops, mark it as @release["Mobile parity", blocked, eta: TBD, owner: Mobile].`,
+  bridge: `The next release is @release[Agent Inbox; beta; July 2026; Core UX].
+
+If launch confidence drops, mark it as @release[Mobile parity; blocked; TBD; Mobile].`,
 };
 
 const ROADMAP_DEMO = `## Product Review
 
-@kpi["Launch confidence", "78%", change: "-4 pts", period: "This month"]
-@kpi["Critical risks", "3", change: "+1", period: "Current"]
+@kpi[Launch confidence; 78%; -4 pts; This month]
+@kpi[Critical risks; 3; +1; Current]
 
 \`\`\`steps
 - [done] Lock roadmap themes
@@ -360,9 +360,9 @@ export function SyntaxSection({ docsTheme }: { docsTheme: DocsTheme }) {
       <InteractiveDemo title="Live layout demo" description="Turn one markdown block into a balanced multi-column summary section." initial={LIVE_DEMOS.layout} theme={docsTheme} minHeight={250} />
 
       <H3 id="buttons">Buttons</H3>
-      <Code>{`@button["Export Report", href: "#", variant: "primary"]
-@button["Build Forecast", href: "/forecast", variant: "secondary"]
-@button["Download CSV", href: "/export", variant: "default"]`}</Code>
+      <Code>{`@button[Export Report; #; primary]
+@button[Build Forecast; /forecast; secondary]
+@button[Download CSV; /export; default]`}</Code>
       <Table head={['Variant', 'Style']} rows={[
         ['<code>primary</code>', 'Accent fill'],
         ['<code>secondary</code>', 'Surface with border'],
@@ -371,8 +371,8 @@ export function SyntaxSection({ docsTheme }: { docsTheme: DocsTheme }) {
       <InteractiveDemo title="Live buttons and input demo" description="Test action bars and lightweight form prompts inside the same markdown response." initial={LIVE_DEMOS.buttons} theme={docsTheme} minHeight={230} />
 
       <H3 id="inputs">Inputs</H3>
-      <Code>{`@input["Follow-up", type: "text", placeholder: "Ask a follow-up..."]
-@input["Work email", type: "email", placeholder: "you@company.com"]`}</Code>
+      <Code>{`@input[Follow-up; text; Ask a follow-up...]
+@input[Work email; email; you@company.com]`}</Code>
 
       <H3 id="video">Video Embeds</H3>
       <P>YouTube and Vimeo URLs become responsive 16:9 iframes. Any other URL renders a native <IC>{`<video>`}</IC> element.</P>
@@ -411,7 +411,7 @@ export function BridgesSection({ docsTheme }: { docsTheme: DocsTheme }) {
       <H3 id="bridge-demo">Live bridge demo</H3>
       <P>The docs demo includes a custom bridge called <IC>release</IC>.</P>
       <Table head={['Piece', 'Example']} rows={[
-        ['Marker syntax', '<code>@release["Agent Inbox", beta, eta: "July 2026", owner: "Core UX"]</code>'],
+        ['Marker syntax', '<code>@release[Agent Inbox; beta; July 2026; Core UX]</code>'],
         ['Schema', '<code>[B.string("name"), B.enum("status", [...]), ...]</code>'],
         ['Best use', 'Roadmap chips, launch badges, release summaries, ownership metadata'],
       ]} />
@@ -448,16 +448,17 @@ const statusBridge = defineBridge({
       <H3 id="bridge-fields">Positional Mapping</H3>
       <P>The order of fields in the array defines the positional arguments. AI can use shorthand or named keys.</P>
       <Code>{`// Define: [B.string('label'), B.string('value')]
-// AI uses: @kpi["Revenue", "$167k"]
-// Or: @kpi[label: "Revenue", value: "$167k"]`}</Code>
+// Positional: @kpi[Revenue; $167k]
+// Named:      @kpi[label=Revenue; value=$167k]`}</Code>
  
       <H3 id="bridge-patterns">Recursive Field Parsing</H3>
       <P>dTypes recursively parse their contents. A <IC>B.list</IC> of <IC>B.number</IC> will correctly cast every item.</P>
-      <Code>{`@sparkline[|38, 41, 45, 49|]`}</Code>
+      <Code>{`@sparkline[38,41,45,49]`}</Code>
 
-      <H3 id="bridge-patterns-2">Smart Delimiters</H3>
-      <P>Lists within <IC>|...|</IC> automatically detect the best delimiter. Use <IC>|</IC> as a separator if items contain commas.</P>
-      <Code>{`@servicemap[nodes: |node1,Label,0,0|node2,Other,10,10|]`}</Code>
+      <H3 id="bridge-patterns-2">Field Separators</H3>
+      <P>Use <IC>;</IC> to separate fields. Commas are for inner lists within a single field value. Quote a value with <IC>"..."</IC> if it contains <IC>;</IC> or <IC>=</IC>.</P>
+      <Code>{`@kpi[Revenue; $167k; +14%; QoQ]
+@kpi[label=Revenue; value=$167k; change=+14%; period=QoQ]`}</Code>
  
       <H3 id="bridge-register">Register with parse and renderContent</H3>
       <P>Pass the same <IC>bridges</IC> array to both.</P>

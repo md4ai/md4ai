@@ -1,5 +1,4 @@
-export { parse } from './parse/index.js';
-export { parseStreaming } from './parse/streaming.js';
+export { parse, parseStreaming } from './parse/core/index.js';
 export { renderContent } from './renderers/html/index.js';
 export { themes } from './themes.js';
 export { defineBridge, bridgePatterns, parseBridgeData, getBridgePrompt, splitKV, unquoteKV, getBridgeProtocolPrompt } from './bridge.js';

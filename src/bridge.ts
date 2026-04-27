@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { BridgeField, type InferSchemaType } from './dtypes.js';
-import { splitHybrid, cleanToken } from './lexer.js';
+import { splitHybrid, splitSemi, cleanToken } from './lexer.js';
  
 export type { InferSchemaType };
 
@@ -28,6 +28,8 @@ export interface BridgeDefinition<T = unknown> {
   fields?: BridgeFields;
   render: (data: T, ctx: BridgeRenderCtx) => ReactElement | null;
   prompt: string;
+  /** Set to false to never show a skeleton placeholder while this bridge is streaming. */
+  skeleton?: boolean;
   /** @internal */
   _parse: (raw: string) => T;
 }
@@ -148,16 +150,18 @@ export function getBridgePrompt(
  */
 export function getBridgeProtocolPrompt(): string {
   return [
-    '### Universal Bridge Syntax (@marker)',
-    'Use @marker[data] to insert rich components. Brackets `[...]` are ALWAYS mandatory.',
-    '1. **Fields**: You can use positional arguments, named keys, or a mix of both.',
-    '   - Positional: @marker["Value 1", "Value 2"]',
-    '   - Named: @marker[key1: "Value 1", key2: "Value 2"]',
-    '   - Hybrid: @marker["Value 1", key2: "Value 2"]',
-    '2. **Lists**: Wrap multi-item lists in pipes to avoid comma clashing: @marker[|a, b, c|].',
-    '3. **Smart Delimiters**: Inside |...|, use `|` as a separator if items contain commas (e.g., @marker[|id,label|id2,label|]).',
-    '4. **Spacing**: Ensure a space precedes the `@` symbol if it is mid-sentence.',
-    '5. **No-Code**: NEVER emit bridges inside markdown code blocks or backticks.',
+    '### Bridge Syntax (@marker)',
+    'Use @marker[...] to insert rich UI components inline.',
+    '**Separator**: Use semicolons `;` between fields — safe in all markdown contexts (tables, lists, blockquotes).',
+    '**Positional**: @marker[value1; value2; value3]',
+    '**Named**:     @marker[key=value; key2=value2]',
+    '**Mixed**:     @marker[value1; key2=value2]',
+    '**Lists**:     Comma-separate items within a field: @marker[tags=a,b,c; next]',
+    '**Records**:   For structured lists, pipe-separate records and comma-separate sub-fields within each record:',
+    '               @marker[nodes=id,label,x,y|id2,label2,x2,y2; other=val]',
+    '**Quotes**:    Only quote values that contain `;` or `=`: @marker["a;b"; next]',
+    '**Spacing**:   Ensure a space before `@` when mid-sentence.',
+    '**No-Code**:   NEVER emit bridges inside code fences or backticks.',
   ].join('\n');
 }
 
@@ -172,9 +176,12 @@ function promptFromFields(marker: string, fields: BridgeFields): string {
       part += `: ${f.metadata.options.join('|')}`;
     } else if (f.metadata.type === 'list') {
       part = `|${part}|`;
+    } else if (f.metadata.type === 'records') {
+      const sub = (f.metadata.recordFields || []).map((rf) => rf.metadata.name).join(',');
+      part += `=<${sub}> (| per record)`;
     }
     return part;
-  }).join(', ');
+  }).join('; ');
  
   const fieldDetails = fields
     .map((f) => {
@@ -189,18 +196,18 @@ function promptFromFields(marker: string, fields: BridgeFields): string {
     .filter(Boolean)
     .join('\n');
  
-  let res = `- ${marker}: [${catalog}]`;
+  let res = `- @${marker}[${catalog}]`;
   if (fieldDetails) res += `\n${fieldDetails}`;
   return res;
 }
 
 function autoPrompt(marker: string, pattern: BuiltinPattern | Function): string {
   switch (pattern) {
-    case 'scalar': return `Use @${marker}[value] inline. Example: @${marker}[success]`;
-    case 'array': return `Use @${marker}[a, b, c] inline. Example: @${marker}[React, Vue, Angular]`;
-    case 'keyvalue': return `Use @${marker}[key: value, key: value] inline. Example: @${marker}[name: Alice, role: Admin]`;
-    case 'range': return `Use @${marker}[low → high] inline. Example: @${marker}[100 → 500]`;
-    default: return `Use @${marker}[data] to render a ${marker} component.`;
+    case 'scalar':   return `Use @${marker}[value] inline. Example: @${marker}[success]`;
+    case 'array':    return `Use @${marker}[a,b,c] inline. Example: @${marker}[React,Vue,Angular]`;
+    case 'keyvalue': return `Use @${marker}[key=value; key2=value2] inline. Example: @${marker}[name=Alice; role=Admin]`;
+    case 'range':    return `Use @${marker}[low → high] inline. Example: @${marker}[100 → 500]`;
+    default:         return `Use @${marker}[data] to render a ${marker} component.`;
   }
 }
 
@@ -214,6 +221,8 @@ export function defineBridge<F extends BridgeField<any>[]>(def: {
   fields: F;
   render: (data: InferSchemaType<F>, ctx: BridgeRenderCtx) => ReactElement | null;
   onParseError?: (raw: string, error: unknown) => InferSchemaType<F>;
+  /** Set to false to disable the streaming skeleton for this bridge. Default: true */
+  skeleton?: boolean;
 }): BridgeDefinition<InferSchemaType<F>>;
 
 /** Bridge defined with an explicit pattern — full control over parsing. */
@@ -223,6 +232,8 @@ export function defineBridge<T = string>(def: {
   render: (data: T, ctx: BridgeRenderCtx) => ReactElement | null;
   prompt?: string;
   onParseError?: (raw: string, error: unknown) => T;
+  /** Set to false to disable the streaming skeleton for this bridge. Default: true */
+  skeleton?: boolean;
 }): BridgeDefinition<T>;
 
 export function defineBridge<T>(def: {
@@ -232,6 +243,7 @@ export function defineBridge<T>(def: {
   render: (data: T, ctx: BridgeRenderCtx) => ReactElement | null;
   prompt?: string;
   onParseError?: (raw: string, error: unknown) => T;
+  skeleton?: boolean;
 }): BridgeDefinition<T> {
   if (!isValidMarker(def.marker)) {
     throw new Error(`Invalid bridge marker "${def.marker}". Markers must match /^[a-z][a-z0-9-]*$/.`);
@@ -246,56 +258,54 @@ export function defineBridge<T>(def: {
     fields: def.fields,
     render: def.render,
     prompt,
+    ...(def.skeleton === false && { skeleton: false }),
     _parse: (raw: string) => {
       try {
         const fields = def.fields || [];
         if (fields.length === 0) {
           return parseBridgeData(pattern, raw);
         }
-        const tokens = splitHybrid(raw);
+        // Detect syntax mode:
+        //   semi  → @marker[val1; val2; key=val3]  (new compact syntax)
+        //   legacy → @marker["val", key: "val"]    (backward compat)
+        const hasSemi = raw.includes(';') && !raw.includes(':');
+        const tokens = hasSemi ? splitSemi(raw) : splitHybrid(raw);
         const data: any = {};
         let positionalIdx = 0;
 
-        // Internal recursive parser for fields
         const parseValue = (field: BridgeField<any>, rawVal: any): any => {
           const meta = field.metadata;
           const val = cleanToken(String(rawVal || ''));
 
-          if (val === undefined || val === '') {
-            return meta.defaultValue;
-          }
+          if (val === undefined || val === '') return meta.defaultValue;
 
           if (meta.type === 'number') {
             const num = Number(val);
             return Number.isNaN(num) ? val : num;
           }
-          if (meta.type === 'boolean') {
-            return val.toLowerCase() === 'true';
-          }
-          if (meta.type === 'enum') {
-            return val;
-          }
+          if (meta.type === 'boolean') return val.toLowerCase() === 'true';
+          if (meta.type === 'enum') return val;
           if (meta.type === 'list') {
-            const originalRaw = String(rawVal || '').trim();
-            const isPiped = originalRaw.startsWith('|') && originalRaw.endsWith('|');
-            const delimiter = (isPiped && val.includes('|')) ? '|' : ',';
-            const items = val.split(delimiter).map((s) => s.trim()).filter(Boolean);
-            if (meta.itemType) {
-              return items.map((item) => parseValue(meta.itemType!, item));
-            }
-            return items;
+            const items = val.split(',').map((s) => s.trim()).filter(Boolean);
+            return meta.itemType ? items.map((item) => parseValue(meta.itemType!, item)) : items;
+          }
+          if (meta.type === 'records') {
+            const subFields = meta.recordFields || [];
+            return val.split('|').map((s) => s.trim()).filter(Boolean).map((item) => {
+              const parts = item.split(',').map((p) => p.trim());
+              const record: Record<string, any> = {};
+              subFields.forEach((sf, i) => {
+                record[sf.metadata.name] = parseValue(sf, parts[i] ?? '');
+              });
+              return record;
+            });
           }
           if (meta.type === 'keyvalue') {
-            const originalRaw = String(rawVal || '').trim();
-            const isPiped = originalRaw.startsWith('|') && originalRaw.endsWith('|');
-            const delimiter = (isPiped && val.includes('|')) ? '|' : ',';
             const kv: Record<string, string> = {};
-            val.split(delimiter).forEach((p) => {
+            val.split(',').forEach((p) => {
               const c = p.indexOf(':');
               if (c !== -1) {
-                const k = cleanToken(p.slice(0, c));
-                const v = cleanToken(p.slice(c + 1));
-                kv[k] = v;
+                kv[cleanToken(p.slice(0, c))] = cleanToken(p.slice(c + 1));
               }
             });
             return kv;
@@ -304,10 +314,17 @@ export function defineBridge<T>(def: {
         };
 
         tokens.forEach((token) => {
-          const colon = token.indexOf(':');
-          if (colon !== -1 && !token.startsWith('|') && !token.startsWith('"')) {
-            const key = cleanToken(token.slice(0, colon));
-            const val = token.slice(colon + 1);
+          // New syntax: key=value  |  Legacy syntax: key: value
+          const eqIdx = token.indexOf('=');
+          const colonIdx = token.indexOf(':');
+          const isNamed =
+            (hasSemi && eqIdx !== -1 && !token.startsWith('"')) ||
+            (!hasSemi && colonIdx !== -1 && !token.startsWith('|') && !token.startsWith('"'));
+
+          if (isNamed) {
+            const sep = hasSemi ? eqIdx : colonIdx;
+            const key = cleanToken(token.slice(0, sep));
+            const val = token.slice(sep + 1);
             data[key] = val;
           } else {
             while (positionalIdx < fields.length) {

@@ -4,13 +4,23 @@
 
 ## Parsing
 
-`src/parse/` extends markdown into a stable intermediate representation. Plugins normalize callouts, fenced rich blocks, directives, and inline bridges before `rootToIR()` converts the mdast tree into library-owned node types.
+`src/parse/core/` contains a custom recursive-descent markdown parser with zero external dependencies. It produces a stable intermediate representation (IR). The parser handles:
+
+- All standard markdown: headings, paragraphs, bold, emphasis, links, images, blockquotes, lists, tables, code blocks, horizontal rules, task lists
+- md4ai extensions: callouts (`> [!NOTE]`), fenced rich blocks (`chart`, `video`, `layout`, `steps`, `timeline`), and inline bridges (`@marker[...]`)
+- Streaming: `parseStreaming` auto-closes unclosed fences and drops trailing incomplete bridge spans so partial LLM output never throws
+
+Key files:
+- `src/parse/core/index.ts` — `parse()` and `parseStreaming()` entry points
+- `src/parse/core/blocks.ts` — block-level parser dispatching all fence types, callouts, tables, lists
+- `src/parse/core/inline.ts` — `scanInline()` for bridges, bold, emphasis, links, images
+- `src/parse/core/state.ts` — `ParseState`, `forkState()` for recursive parsing inside layout columns
 
 ## Rendering
 
 `src/renderers/html/` turns IR nodes into React elements. `renderContent()` provides themed default components while still allowing host apps to override individual node renderers.
 
-The package now exposes that split directly:
+The package exposes a clean split:
 
 - `@architprasar/md4ai/core` for parsing, streaming, bridges, and IR types
 - `@architprasar/md4ai/react` for `renderContent()`, themes, and renderer override types
@@ -24,23 +34,31 @@ The renderer intentionally separates parsing from presentation:
 
 ## Streaming And Fallbacks
 
-`src/parse/streaming.ts` is a thin lenient wrapper around `parse()`. Before parsing, it auto-closes trailing fenced blocks and open directives so incomplete LLM output remains renderable.
+`parseStreaming` is a thin lenient wrapper around `parse()`. Before parsing, it auto-closes trailing fenced blocks and drops open `@marker[` spans so incomplete LLM output remains renderable.
 
-Current fallback behavior is deliberately simple:
+Current fallback behavior:
 
-- Partial `chart` JSON becomes a `chart` node with `data: null`.
+- Partial `chart` JSON becomes a `chart` node with `data: null` (renders as shimmer skeleton).
 - Partial `video` and `layout` fences still resolve into IR nodes.
 - Generic unfinished code fences are closed and preserved as normal code blocks.
-
-This keeps the parser deterministic while letting host apps update the same message repeatedly during token streaming.
+- An open `@marker[` at the end of the text is stripped rather than rendered.
 
 ## Extension Points
 
 The public extension surface is small on purpose:
 
-- `defineBridge()` adds inline `@marker[data]` tokens with predictable parsing.
+- `defineBridge()` adds inline `@marker[data]` tokens with predictable parsing and auto-generated AI prompts.
 - `renderContent(..., { components })` swaps renderer implementations without changing the parser.
 - `renderContent(..., { theme })` scopes CSS variable overrides to a single content tree.
+
+## Bridge Syntax
+
+Bridges use `;` as the field separator (safe in all markdown contexts — tables, blockquotes, lists). Commas separate inner list items within a single field.
+
+```markdown
+@kpi[Revenue; $167k; +18%; QoQ]
+@agent[CodeSentinel; Reviewer; done; tools=AST,Semgrep]
+```
 
 ## Demo App
 

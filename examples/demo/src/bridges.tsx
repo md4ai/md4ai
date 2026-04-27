@@ -1217,32 +1217,34 @@ export const servicemapBridge = defineBridge({
   fields: [
     B.string('title').optional(),
     B.string('note').optional(),
-    B.list('nodes', B.string()).describe('id,label,x,y,status,meta'),
-    B.list('edges', B.string()).describe('source>target>label'),
+    B.records('nodes', [
+      B.string('id'),
+      B.string('label'),
+      B.number('x'),
+      B.number('y'),
+      B.enum('status', ['active', 'done', 'planned', 'blocked']).default('planned'),
+      B.string('meta').optional(),
+    ]).describe('Graph nodes. Pipe-separate records; comma-separate fields: id,label,x,y,status,meta'),
+    B.list('edges', B.string()).describe('source>target>label — comma-separate multiple edges'),
   ],
-  render: ({ title, note, nodes, edges }) => {
-    const flowNodes = (nodes || []).map((item, index) => {
-      const [id, label, x, y, status, meta] = item.split(',').map((part) => part.trim());
-      return {
-        id: id || `node-${index}`,
-        label: label || id || `Node ${index + 1}`,
-        x: Number(x ?? 0),
-        y: Number(y ?? 0),
-        status,
-        meta,
-      };
-    }).filter((item) => !Number.isNaN(item.x) && !Number.isNaN(item.y));
- 
-    const flowEdges = (edges || []).map((item, index) => {
+  render: ({ title, note, nodes: nodesRaw, edges: edgesRaw }) => {
+    const nodes = (nodesRaw as Record<string, any>[]) || [];
+    const edges = (edgesRaw as string[]) || [];
+
+    const flowNodes = nodes.map((node, index) => ({
+      id: node['id'] || `node-${index}`,
+      label: node['label'] || node['id'] || `Node ${index + 1}`,
+      x: Number(node['x'] ?? 0),
+      y: Number(node['y'] ?? 0),
+      status: node['status'],
+      meta: node['meta'],
+    })).filter((item) => !Number.isNaN(item.x) && !Number.isNaN(item.y));
+
+    const flowEdges = edges.map((item, index) => {
       const [source, target, label] = item.split('>').map((part) => part.trim());
-      return {
-        id: `edge-${index}-${source}-${target}`,
-        source,
-        target,
-        label,
-      };
+      return { id: `edge-${index}-${source}-${target}`, source, target, label };
     }).filter((edge) => edge.source && edge.target);
- 
+
     return <FlowCard title={title} note={note} nodes={flowNodes} edges={flowEdges} />;
   },
 });
@@ -1252,20 +1254,23 @@ export const pipelineflowBridge = defineBridge({
   fields: [
     B.string('title').optional(),
     B.string('note').optional(),
-    B.list('stages', B.string()).describe('label,amount,count,status'),
+    B.records('stages', [
+      B.string('label'),
+      B.string('amount').optional(),
+      B.string('count').optional(),
+      B.enum('status', ['active', 'done', 'planned', 'blocked']).default('planned'),
+    ]).describe('Pipeline stages. Pipe-separate records; comma-separate fields: label,amount,count,status'),
   ],
-  render: ({ title, note, stages }) => {
-    const stageData = (stages || []).map((item, index) => {
-      const [label, amount, count, status] = item.split(',').map((part) => part.trim());
-      return {
-        id: `stage-${index}`,
-        label: label || `Stage ${index + 1}`,
-        amount: amount || '—',
-        count: count || '—',
-        status,
-      };
-    });
- 
+  render: ({ title, note, stages: stagesRaw }) => {
+    const stages = (stagesRaw as Record<string, any>[]) || [];
+    const stageData = stages.map((stage, index) => ({
+      id: `stage-${index}`,
+      label: stage['label'] || `Stage ${index + 1}`,
+      amount: stage['amount'] || '—',
+      count: stage['count'] || '—',
+      status: stage['status'],
+    }));
+
     const nodes = stageData.map((stage, index) => ({
       id: stage.id,
       label: stage.label,
@@ -1274,14 +1279,14 @@ export const pipelineflowBridge = defineBridge({
       status: stage.status,
       meta: `${stage.amount} • ${stage.count}`,
     }));
- 
+
     const edges = stageData.slice(0, -1).map((stage, index) => ({
       id: `pipeline-edge-${index}`,
       source: stage.id,
       target: stageData[index + 1]!.id,
       label: index < stageData.length - 1 ? `${Math.max(0, 100 - (index * 14))}%` : undefined,
     }));
- 
+
     return <FlowCard title={title} note={note} nodes={nodes} edges={edges} />;
   },
 });
@@ -1473,6 +1478,46 @@ export const fileheatBridge = defineBridge({
   },
 });
 
+export const buttonBridge = defineBridge({
+  marker: 'button',
+  fields: [
+    B.string('label').describe('Button label text'),
+    B.string('href').optional().describe('Link destination'),
+    B.enum('variant', ['primary', 'secondary', 'default']).default('default').describe('Visual style'),
+  ],
+  render: ({ label, href, variant = 'default' }) => {
+    const cls = `md4ai-button md4ai-button--${variant}`;
+    if (href) return <a href={href} className={cls} target="_blank" rel="noreferrer">{label}</a>;
+    return <button type="button" className={cls}>{label}</button>;
+  },
+});
+
+export const inputBridge = defineBridge({
+  marker: 'input',
+  fields: [
+    B.string('label').describe('Input label'),
+    B.string('type').default('text').describe('Input type: text, email, number'),
+    B.string('placeholder').optional().describe('Placeholder text'),
+  ],
+  render: ({ label, type = 'text', placeholder }) => (
+    <div className="md4ai-input-wrapper">
+      {label && <label className="md4ai-input-label">{label}</label>}
+      <input type={type} placeholder={placeholder} className="md4ai-input" />
+    </div>
+  ),
+});
+
+export const cardBridge = defineBridge({
+  marker: 'card',
+  fields: [B.string('title').describe('Card title')],
+  render: ({ title }) => (
+    <div className="md4ai-card">
+      {title && <div className="md4ai-card__title">{title}</div>}
+      <div className="md4ai-card__body" />
+    </div>
+  ),
+});
+
 export const BRIDGES = [
   kpiBridge,
   sparklineBridge,
@@ -1490,4 +1535,7 @@ export const BRIDGES = [
   pipelineflowBridge,
   gaugeBridge,
   fileheatBridge,
+  buttonBridge,
+  inputBridge,
+  cardBridge,
 ];

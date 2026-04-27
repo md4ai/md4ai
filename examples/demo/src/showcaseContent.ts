@@ -19,7 +19,7 @@ CodeSentinel has finished analyzing this pull request. The review found **3 bloc
 
 The refactor split the monolithic checkout controller into four focused modules. Two new dependency edges introduce coupling that did not exist in v2 — both are flagged below.
 
-@servicemap["Checkout v3 module graph", "New edges highlighted. billing to logger is the leak path.", nodes: |api,API Layer,0,80,active,POST /checkout|validator,Input Validator,220,0,done,schema v3|processor,Checkout Processor,220,160,blocked,SQL blocker|billing,Billing Module,460,80,blocked,secret leak|db,DB Query Layer,460,240,active,parameterized|logger,Logger,680,80,blocked,logs PII|, edges: |api>validator>validate request|api>processor>process|processor>db>query|processor>billing>charge|billing>logger>audit trail|validator>processor>pass through|]
+@servicemap[Checkout v3 module graph; note=New edges highlighted. billing to logger is the leak path.; nodes=api,API Layer,0,80,active,POST /checkout|validator,Input Validator,220,0,done,schema v3|processor,Checkout Processor,220,160,blocked,SQL blocker|billing,Billing Module,460,80,blocked,secret leak|db,DB Query Layer,460,240,active,parameterized|logger,Logger,680,80,blocked,logs PII; edges=api>validator>validate request,api>processor>process,processor>db>query,processor>billing>charge,billing>logger>audit trail,validator>processor>pass through]
 
 ---
 
@@ -40,9 +40,9 @@ The refactor split the monolithic checkout controller into four focused modules.
 
 Coverage dropped in the two highest-risk modules. The deleted billing test file accounts for most of the regression.
 
-@kpi["Checkout Processor", 61%, change: -14%, period: "vs main"]
-@kpi["Billing Module", 48%, change: -31%, period: "vs main"]
-@kpi["Auth + Session", 83%, change: +6%, period: "vs main"]
+@kpi[Checkout Processor; 61%; -14%; vs main]
+@kpi[Billing Module; 48%; -31%; vs main]
+@kpi[Auth + Session; 83%; +6%; vs main]
 
 @gauge["Checkout Processor", 61, max: 100, unit: %, warn: 75, crit: 65]
 @gauge["Billing Module", 48, max: 100, unit: %, warn: 75, crit: 65]
@@ -102,15 +102,15 @@ Bundle size delta (kb): @sparkline[|0, 0, 2, 2, 8, 8, 8|]
 
 ---
 
-:::card{title="Upgrade to CodeSentinel Pro for team-wide enforcement"}
+@card[Upgrade to CodeSentinel Pro for team-wide enforcement]
+
 The free tier analyzed this PR in isolation. Pro adds merge blocking at the branch protection level, a historical exploit pattern database, auto-fix suggestions with one-click PR commits, and Slack + Linear integration so blockers surface in your existing workflow — not just in the review tab.
-:::
 
 @payment["$79", "CodeSentinel Pro", desc: "Automatic merge blocking, exploit pattern database, auto-fix PRs, and Slack or Linear integration for every repository in your organization."]
 
-::button[Enable merge protection]{href="#" variant="primary"}
+@button[Enable merge protection; #; primary]
 
-::button[View full audit log]{href="#" variant="secondary"}
+@button[View full audit log; #; secondary]
 
-::input{type="text" placeholder="Ask CodeSentinel about another file, rule, or fix..." label="Follow-up"}
+@input[Follow-up; text; Ask CodeSentinel about another file, rule, or fix...]
 `;

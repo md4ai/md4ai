@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseStreaming } from '../.test-dist/test/entry.js';
+import { parseStreaming, defineBridge, B } from '../.test-dist/test/entry.js';
 
 test('parseStreaming keeps incomplete chart fences renderable', () => {
   const nodes = parseStreaming('```chart\n{"type":"bar","labels":["Q1"]');
@@ -11,18 +11,28 @@ test('parseStreaming keeps incomplete chart fences renderable', () => {
   assert.equal(nodes[0].data, null);
 });
 
-test('parseStreaming auto-closes open card directives', () => {
-  const nodes = parseStreaming(':::card{title="Next step"}\nShip the docs');
+test('parseStreaming emits a partial bridge node when a bridge token is incomplete', () => {
+  const kpiBridge = defineBridge({
+    marker: 'kpi',
+    fields: [
+      B.string('label'),
+      B.string('value'),
+      B.string('change').optional(),
+    ],
+    render: () => null,
+  });
+
+  // Simulate mid-stream: @kpi[ has opened but ] hasn't arrived yet
+  const nodes = parseStreaming('Revenue this quarter: @kpi[Q4 Revenue; $2.1M', { bridges: [kpiBridge] });
 
   assert.equal(nodes.length, 1);
-  assert.equal(nodes[0].type, 'card');
-  assert.equal(nodes[0].title, 'Next step');
-  assert.deepEqual(nodes[0].children, [
-    {
-      type: 'paragraph',
-      children: [{ type: 'text', value: 'Ship the docs' }],
-    },
-  ]);
+  assert.equal(nodes[0].type, 'paragraph');
+  const bridge = nodes[0].children[1];
+  assert.equal(bridge.type, 'bridge');
+  assert.equal(bridge.marker, 'kpi');
+  assert.equal(bridge.partial, true);
+  // Raw must not contain the sentinel byte
+  assert.ok(!bridge.raw.includes('\x00'));
 });
 
 test('parseStreaming keeps incomplete steps fences renderable', () => {
@@ -36,19 +46,22 @@ test('parseStreaming keeps incomplete steps fences renderable', () => {
   ]);
 });
 
-test('parseStreaming keeps nested card directives renderable even with trailing fallback text', () => {
-  const nodes = parseStreaming(`:::card{title="Outer"}
-:::card{title="Inner"}
-Ship this safely`);
+test('parseStreaming produces no partial node once the bridge token is closed', () => {
+  const kpiBridge = defineBridge({
+    marker: 'kpi',
+    fields: [B.string('label'), B.string('value')],
+    render: () => null,
+  });
 
-  assert.equal(nodes.length, 2);
-  assert.equal(nodes[0].type, 'card');
-  assert.equal(nodes[0].title, 'Outer');
-  assert.equal(nodes[0].children.length, 1);
-  assert.equal(nodes[0].children[0].type, 'card');
-  assert.equal(nodes[0].children[0].title, 'Inner');
-  assert.equal(nodes[1].type, 'paragraph');
-  assert.deepEqual(nodes[1].children, [{ type: 'text', value: ':::' }]);
+  const nodes = parseStreaming('@kpi[Revenue; $2.1M]', { bridges: [kpiBridge] });
+
+  assert.equal(nodes.length, 1);
+  const bridge = nodes[0].children[0];
+  assert.equal(bridge.type, 'bridge');
+  assert.equal(bridge.marker, 'kpi');
+  assert.ok(!bridge.partial);
+  assert.equal(bridge.data.label, 'Revenue');
+  assert.equal(bridge.data.value, '$2.1M');
 });
 
 test('parseStreaming auto-closes generic code fences without dropping content', () => {

@@ -1,6 +1,6 @@
 {
   "name": "@md4ai/core",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "AI-friendly rich markdown core — extended markdown syntax that renders to interactive UI",
   "type": "module",
   "main": "./dist/core.umd.cjs",
@@ -37,11 +37,11 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/architprasar/md4ai.git"
+    "url": "git+https://github.com/md4ai/md4ai.git"
   },
-  "homepage": "https://github.com/architprasar/md4ai#readme",
+  "homepage": "https://github.com/md4ai/md4ai#readme",
   "bugs": {
-    "url": "https://github.com/architprasar/md4ai/issues"
+    "url": "https://github.com/md4ai/md4ai/issues"
   },
   "publishConfig": {
     "access": "public"

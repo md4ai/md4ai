@@ -111,12 +111,12 @@ import { parse, parseStreaming, defineBridge, renderContent, themes } from '@md4
 ---
 
 ## Documentation
-Detailed documentation and interactive playground are available at [architprasar.github.io/md4ai](https://architprasar.github.io/md4ai).
+Detailed documentation and interactive playground are available at [md4ai.github.io/md4ai/showcase.html](https://md4ai.github.io/md4ai/showcase.html).
 
 ## Agent Support (MCP & llms.txt)
 md4ai is designed for AI native workflows.
 - **MCP Server**: Connect your agent with `npx md4ai-mcp`.
-- **llms.txt**: Agents can find a concise map at [https://architprasar.github.io/md4ai/llms.txt](https://architprasar.github.io/md4ai/llms.txt) or full context at [https://architprasar.github.io/md4ai/llms-full.txt](https://architprasar.github.io/md4ai/llms-full.txt).
+- **llms.txt**: Agents can find a concise map at [https://md4ai.github.io/md4ai/llms.txt](https://md4ai.github.io/md4ai/llms.txt) or full context at [https://md4ai.github.io/md4ai/llms-full.txt](https://md4ai.github.io/md4ai/llms-full.txt).
 
 ## Repository layout
 

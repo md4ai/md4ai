@@ -34,7 +34,7 @@ export function SiteHeader({
   });
 
   const githubLink = (
-    <a href="https://github.com/architprasar/md4ai" className="app-header__nav-link">
+    <a href="https://github.com/md4ai/md4ai" className="app-header__nav-link">
       GitHub
     </a>
   );

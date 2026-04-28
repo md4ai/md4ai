@@ -218,7 +218,7 @@ export function DocsHeroSection() {
           <div style={{ display: 'flex', gap: '0.7rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
             <a href="./showcase.html" className="btn-icon btn-icon--active" style={{ textDecoration: 'none' }}>Open live demo</a>
             <a href="./index.html" className="btn-icon" style={{ textDecoration: 'none' }}>Open playground</a>
-            <a href="https://github.com/architprasar/md4ai" className="btn-icon" style={{ textDecoration: 'none' }}>GitHub</a>
+            <a href="https://github.com/md4ai/md4ai" className="btn-icon" style={{ textDecoration: 'none' }}>GitHub</a>
             <CopyMCPButton />
             <CopyLLMSTxtButton />
           </div>

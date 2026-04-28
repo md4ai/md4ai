@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { themes } from '@architprasar/md4ai/react';
+import { themes } from '@md4ai/core';
 import { SiteBackdrop } from './components/SiteBackdrop.js';
 import { SiteHeader } from './components/SiteHeader.js';
 import { demoChromeVars, tokensToCSSVars, useStoredColorMode } from './theme.js';

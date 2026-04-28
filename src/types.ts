@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
 import type { BridgeDefinition } from './bridge.js';
+import type { Md4aiDebugEvent, Md4aiDebugOptions } from './debug.js';
 
 export type InlineNode =
   | { type: 'text'; value: string }
@@ -69,6 +70,10 @@ export interface ParseOptions {
   /** Registered bridges — teaches the parser which @marker[data] tokens to recognize */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bridges?: BridgeDefinition<any>[];
+  /** Enable structured debug instrumentation for parser and bridge resolution. */
+  debug?: boolean | Md4aiDebugOptions;
+  /** Convenience handler for debug events (used when debug.onEvent is not provided). */
+  onDebugEvent?: (event: Md4aiDebugEvent) => void;
 }
 
 /** Single source of truth: theme key → CSS custom property name */
@@ -116,6 +121,10 @@ export interface RenderContentOptions {
    * Set to false to disable all skeletons globally. Default: true
    */
   skeletons?: boolean;
+  /** Enable structured debug instrumentation for render, fallback, and store calls. */
+  debug?: boolean | Md4aiDebugOptions;
+  /** Convenience handler for debug events (used when debug.onEvent is not provided). */
+  onDebugEvent?: (event: Md4aiDebugEvent) => void;
 }
 
 /**

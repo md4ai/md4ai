@@ -3,7 +3,7 @@
 **Rich markdown for AI.** Drop md4ai into your AI chat UI and responses automatically render as charts, callouts, cards, KPI metrics, timelines, and more — no prompt engineering, no JSON, just markdown.
 
 ```
-npm install @architprasar/md4ai
+npm install @md4ai/core
 ```
 
 > **Peer deps:** `react >=18`, `react-dom >=18`  
@@ -33,7 +33,7 @@ Instead of complex JSON schemas, `md4ai` uses a **dType Schema API** to define c
 ### Example: Defining a Bridge
 
 ```tsx
-import { defineBridge, B } from '@architprasar/md4ai/core';
+import { defineBridge, B } from '@md4ai/core';
 
 const kpiBridge = defineBridge({
   marker: 'kpi',
@@ -66,7 +66,7 @@ The model can emit any of these; the parser handles them all:
 Keep your system prompts small by separating the universal protocol from the component manifest.
 
 ```ts
-import { getBridgeProtocolPrompt, getPrompt } from '@architprasar/md4ai/core';
+import { getBridgeProtocolPrompt, getPrompt } from '@md4ai/core';
 
 // 1. The universal bridge syntax rules
 const protocol = getBridgeProtocolPrompt();
@@ -80,8 +80,8 @@ const catalog = getPrompt({ bridges, mode: 'minimal' });
 ## Quickstart
 
 ```tsx
-import { parse } from '@architprasar/md4ai/core';
-import { renderContent } from '@architprasar/md4ai/react';
+import { parse } from '@md4ai/core';
+import { renderContent } from '@md4ai/core';
 
 function AIMessage({ content }: { content: string }) {
   return renderContent(parse(content));
@@ -91,8 +91,8 @@ function AIMessage({ content }: { content: string }) {
 For streaming responses — call on the full accumulated text every chunk:
 
 ```tsx
-import { parseStreaming } from '@architprasar/md4ai/core';
-import { renderContent } from '@architprasar/md4ai/react';
+import { parseStreaming } from '@md4ai/core';
+import { renderContent } from '@md4ai/core';
 
 function StreamingMessage({ text }: { text: string }) {
   // Safe mid-stream — unclosed fences render as placeholders, never throw
@@ -100,14 +100,13 @@ function StreamingMessage({ text }: { text: string }) {
 }
 ```
 
-If you want a clearer package boundary, use subpath imports:
+Import directly from `@md4ai/core`:
 
 ```tsx
-import { parse, parseStreaming, defineBridge } from '@architprasar/md4ai/core';
-import { renderContent, themes } from '@architprasar/md4ai/react';
+import { parse, parseStreaming, defineBridge, renderContent, themes } from '@md4ai/core';
 ```
 
-`md4ai` still re-exports the full API for backwards compatibility, but `@architprasar/md4ai/core` and `@architprasar/md4ai/react` make the parser/renderer split explicit.
+`@md4ai/core` exports the parser, renderer, bridges, prompts, themes, and types from one package.
 
 ---
 
@@ -116,7 +115,7 @@ Detailed documentation and interactive playground are available at [architprasar
 
 ## Agent Support (MCP & llms.txt)
 md4ai is designed for AI native workflows.
-- **MCP Server**: Connect your agent with `npx @architprasar/md4ai-mcp`.
+- **MCP Server**: Connect your agent with `npx md4ai-mcp`.
 - **llms.txt**: Agents can find a concise map at [https://architprasar.github.io/md4ai/llms.txt](https://architprasar.github.io/md4ai/llms.txt) or full context at [https://architprasar.github.io/md4ai/llms-full.txt](https://architprasar.github.io/md4ai/llms-full.txt).
 
 ## Repository layout
@@ -143,7 +142,7 @@ npm run dev
 - `npm run dev` starts the example app for manual QA
 - `npm run build:demo` builds the Pages-ready demo bundle
 
-Contributor workflow and review expectations live in [`CONTRIBUTING.md`](./CONTRIBUTING.md). A short system view of the parser and renderer pipeline lives in [`docs/architecture.md`](./docs/architecture.md). Production integration guidance for streaming, theming, bridges, and component overrides lives in [`docs/production.md`](./docs/production.md).
+Contributor workflow and review expectations live in [`CONTRIBUTING.md`](./CONTRIBUTING.md). A short system view of the parser and renderer pipeline lives in [`docs/architecture.md`](./docs/architecture.md). Production integration guidance for streaming, theming, bridges, and component overrides lives in [`docs/production.md`](./docs/production.md). Bridge debugging and inspector wiring are documented in [`docs/bridge-inspector.md`](./docs/bridge-inspector.md).
 
 ---
 
@@ -391,7 +390,7 @@ Top markets this quarter: @tags[East,North,APAC]
 ### Define a bridge
  
 ```tsx
-import { defineBridge, B } from '@architprasar/md4ai/core';
+import { defineBridge, B } from '@md4ai/core';
  
 // Use B.type() to define a fluent, positional-aware schema
 const releaseBridge = defineBridge({
@@ -432,7 +431,7 @@ const ui = renderContent(nodes, { bridges });
 Use `getPrompt()` when you want a full md4ai-aware prompt that includes built-in syntax guidance plus optional bridge hints. Use `getBridgePrompt()` when you only want the bridge-specific portion:
 
 ```ts
-import { getPrompt, getBridgePrompt } from '@architprasar/md4ai/core';
+import { getPrompt, getBridgePrompt } from '@md4ai/core';
 
 statusBridge.prompt
 // → 'Use @status[value] inline. Example: @status[success]'
@@ -513,7 +512,7 @@ defineBridge({
 If you want to reuse the built-in parsers directly in your own helpers, `parseBridgeData()` is exported:
 
 ```ts
-import { parseBridgeData } from '@architprasar/md4ai/core';
+import { parseBridgeData } from '@md4ai/core';
 
 const tags = parseBridgeData('array', 'React, Vue, Angular');
 // → ['React', 'Vue', 'Angular']
@@ -587,8 +586,8 @@ If a bridge renderer throws at render time, md4ai falls back to showing the orig
 Four built-in themes, each with light and dark variants. All use the same CSS variable system as shadcn — plug straight into your existing shadcn app.
 
 ```tsx
-import { renderContent, themes } from '@architprasar/md4ai/react';
-import type { ThemeName } from '@architprasar/md4ai/react';
+import { renderContent, themes } from '@md4ai/core';
+import type { ThemeName } from '@md4ai/core';
 
 renderContent(nodes, {
   theme: themes.violet.dark,
@@ -661,7 +660,7 @@ Works with highlight.js, Shiki, Prism, lowlight — anything that returns an HTM
 Replace any built-in renderer with your own component:
 
 ```tsx
-import type { ComponentOverrides } from '@architprasar/md4ai/react';
+import type { ComponentOverrides } from '@md4ai/core';
 
 renderContent(nodes, {
   components: {
@@ -728,7 +727,7 @@ See [`docs/production.md`](./docs/production.md) for production patterns using `
 ### `themes`
 
 ```ts
-import { themes } from '@architprasar/md4ai/react';
+import { themes } from '@md4ai/core';
 // themes.zinc.light | themes.zinc.dark
 // themes.violet.light | themes.violet.dark
 // themes.rose.light | themes.rose.dark

@@ -1,18 +1,21 @@
 import type { BridgeDefinition } from '../../bridge.js';
+import type { Md4aiDebugHook } from '../../debug.js';
 
 export interface ParseState {
   lines: string[];
   pos: number;
   bridges: BridgeDefinition[];
   bridgeSet: Set<string>;
+  debug: Md4aiDebugHook;
 }
 
-export function makeState(markdown: string, bridges: BridgeDefinition[]): ParseState {
+export function makeState(markdown: string, bridges: BridgeDefinition[], debug: Md4aiDebugHook): ParseState {
   return {
     lines: markdown.replace(/\r\n?/g, '\n').split('\n'),
     pos: 0,
     bridges,
     bridgeSet: new Set(bridges.map((b) => b.marker)),
+    debug,
   };
 }
 
@@ -37,5 +40,5 @@ export function skipBlanks(s: ParseState): void {
 }
 
 export function forkState(s: ParseState, lines: string[]): ParseState {
-  return { lines, pos: 0, bridges: s.bridges, bridgeSet: s.bridgeSet };
+  return { lines, pos: 0, bridges: s.bridges, bridgeSet: s.bridgeSet, debug: s.debug };
 }

@@ -5,7 +5,7 @@ import { scanInline } from './inline.js';
 // ─── inline helper ────────────────────────────────────────────────────────────
 
 function il(text: string, s: ParseState): InlineNode[] {
-  return scanInline(text, s.bridgeSet, s.bridges);
+  return scanInline(text, s.bridgeSet, s.bridges, s.debug, s.pos + 1);
 }
 
 // ─── block boundary detection ─────────────────────────────────────────────────

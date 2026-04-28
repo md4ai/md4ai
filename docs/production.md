@@ -7,8 +7,8 @@ This guide focuses on the operational side of `md4ai`: how to stream safely, lay
 Use `parseStreaming()` on the full accumulated response text every time a new chunk arrives:
 
 ```tsx
-import { parseStreaming } from '@architprasar/md4ai/core';
-import { renderContent } from '@architprasar/md4ai/react';
+import { parseStreaming } from '@md4ai/core';
+import { renderContent } from '@md4ai/core';
 
 function AssistantMessage({ text }: { text: string }) {
   return renderContent(parseStreaming(text));
@@ -33,7 +33,7 @@ Recommended app pattern:
 `renderContent()` scopes theme tokens to the wrapper it returns, so the safest production path is to derive your app shell and `md4ai` from the same token object:
 
 ```tsx
-import { renderContent, themes } from '@architprasar/md4ai/react';
+import { renderContent, themes } from '@md4ai/core';
 
 const theme = themes.blue.dark;
 
@@ -122,6 +122,21 @@ That means a good host integration should:
 - Be comfortable rendering partially complete content.
 - Avoid assuming every `chart` node has finalized data.
 - Avoid assuming every bridge token will have a matching renderer in every environment.
+
+For bridge payload quality specifically, add per-bridge fallbacks:
+
+```tsx
+defineBridge({
+  marker: 'kpi',
+  fields: [B.string('label'), B.number('value')],
+  render: ({ label, value }) => <strong>{label}: {value}</strong>,
+  fallback: (raw) => <code>@kpi[{raw}]</code>,
+});
+```
+
+This keeps strict parsing while preserving a visible, debuggable output path for malformed payloads.
+
+For full diagnostics (parse stage, schema errors, store failures, render failures), use the bridge inspector pipeline in [`docs/bridge-inspector.md`](./bridge-inspector.md).
 
 ## Validation
 

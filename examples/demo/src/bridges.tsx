@@ -1,7 +1,7 @@
 import React from 'react';
 import { createChart, ColorType } from 'lightweight-charts';
 import ReactFlow, { Background, Controls, MarkerType, MiniMap, Position } from 'reactflow';
-import { defineBridge, splitKV, unquoteKV, B } from '@architprasar/md4ai/core';
+import { defineBridge, splitKV, unquoteKV, B } from '@md4ai/core';
 
 type Tone = 'done' | 'active' | 'planned' | 'blocked';
 
@@ -206,7 +206,7 @@ const MarketChartCard = React.memo(function MarketChartCard({ data }: { data: Ca
 
   return (
     <span
-      className="showcase-bridge showcase-bridge--candles"
+      className="showcase-bridge float-left showcase-bridge--candles"
       style={{
         display: 'block',
         width: '100%',

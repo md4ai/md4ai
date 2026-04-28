@@ -1,11 +1,11 @@
 import React from 'react';
 import { Callout, Code, H2, H3, IC, InteractiveDemo, P, PromptBuilderDemo, PromptRecipeCards, Table, type DocsTheme } from './ui.js';
-import { getPrompt } from '@architprasar/md4ai/core';
+import { getPrompt } from '@md4ai/core';
 import { BRIDGES } from '../bridges.js';
 
 function CopyMCPButton() {
   const [copied, setCopied] = React.useState(false);
-  const command = 'npx @architprasar/md4ai-mcp';
+  const command = 'npx md4ai-mcp';
 
   const onCopy = () => {
     navigator.clipboard.writeText(command);
@@ -46,7 +46,7 @@ function CopyLLMSTxtButton() {
 }
 
 function DynamicMCPConfig() {
-  const command = "npx @architprasar/md4ai-mcp";
+  const command = "npx md4ai-mcp";
   return (
     <Code>{`{
   "mcpServers": {
@@ -206,7 +206,7 @@ export function DocsHeroSection() {
         <div className="playground-intro__copy">
           <span className="playground-intro__eyebrow">Docs</span>
           <h1>Build rich AI response UIs without forcing models to emit JSON.</h1>
-          <p>Use the parser from <IC>@architprasar/md4ai/core</IC>, render with <IC>@architprasar/md4ai/react</IC>, and keep your app in plain markdown all the way through streaming.</p>
+          <p>Use the parser and renderer from <IC>@md4ai/core</IC>, and keep your app in plain markdown all the way through streaming.</p>
           <div style={{ display: 'flex', gap: '0.7rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
             <a href="./showcase.html" className="btn-icon btn-icon--active" style={{ textDecoration: 'none' }}>Open live demo</a>
             <a href="./index.html" className="btn-icon" style={{ textDecoration: 'none' }}>Open playground</a>
@@ -214,8 +214,8 @@ export function DocsHeroSection() {
             <CopyMCPButton />
             <CopyLLMSTxtButton />
           </div>
-          <Code>{`import { parse, parseStreaming, defineBridge, B } from '@architprasar/md4ai/core';
-import { renderContent, themes } from '@architprasar/md4ai/react';`}</Code>
+          <Code>{`import { parse, parseStreaming, defineBridge, B } from '@md4ai/core';
+import { renderContent, themes } from '@md4ai/core';`}</Code>
         </div>
         <div className="playground-intro__meta">
           {[
@@ -235,7 +235,7 @@ import { renderContent, themes } from '@architprasar/md4ai/react';`}</Code>
         {[
           ['Start here', 'Read the quickstart and then edit the live examples below.'],
           ['Best for', 'Chat UIs, dashboards, agent tools, reports, and internal ops surfaces.'],
-          ['Core split', '`@architprasar/md4ai/core` parses and `@architprasar/md4ai/react` renders with shared bridges.'],
+          ['Single package', '`@md4ai/core` parses, renders, and ships the bridge system together.'],
         ].map(([title, copy]) => (
           <div key={title} className="sample-chip" style={{ minWidth: 0, flex: 1, cursor: 'default' }}>
             <span className="sample-chip__label">{title}</span>
@@ -253,7 +253,7 @@ export function GettingStartedSection({ docsTheme }: { docsTheme: DocsTheme }) {
       <H2 id="getting-started">Getting Started</H2>
       <P>md4ai extends markdown syntax so AI responses automatically render as rich UI components — charts, callouts, KPI cards, payment forms, and more. No prompt engineering, no JSON schemas. The AI writes markdown; md4ai renders it.</P>
       <P>Standard markdown always works as expected. Extensions are additive and degrade to readable plain text without a renderer.</P>
-      <Code>{`npm install @architprasar/md4ai
+      <Code>{`npm install @md4ai/core
 # peer deps
 npm install react react-dom
 # optional — only needed for chart fences
@@ -264,15 +264,15 @@ npm install chart.js`}</Code>
       <DynamicMCPConfig />
 
       <H2 id="quickstart">Quickstart</H2>
-      <Code>{`import { parse, defineBridge, B } from '@architprasar/md4ai/core';
-import { renderContent } from '@architprasar/md4ai/react';
+      <Code>{`import { parse, defineBridge, B } from '@md4ai/core';
+import { renderContent } from '@md4ai/core';
 
 function AIMessage({ content }: { content: string }) {
   return renderContent(parse(content));
 }`}</Code>
       <P>For streaming responses, call <IC>parseStreaming</IC> on the full accumulated text every chunk. Unclosed fences render as animated skeletons — never throw.</P>
-      <Code>{`import { parseStreaming } from '@architprasar/md4ai/core';
-import { renderContent } from '@architprasar/md4ai/react';
+      <Code>{`import { parseStreaming } from '@md4ai/core';
+import { renderContent } from '@md4ai/core';
 
 function StreamingMessage({ text }: { text: string }) {
   return renderContent(parseStreaming(text));
@@ -285,8 +285,8 @@ function StreamingMessage({ text }: { text: string }) {
         rows={[
           ['<a href="./showcase.html">Showcase demo</a>', 'See a finished AI response rendered with charts, tables, KPIs, and timelines'],
           ['<a href="./index.html">Playground</a>', 'Paste your own markdown or switch between realistic presets'],
-          ['<code>@architprasar/md4ai/core</code>', 'Parser, streaming, bridges, and IR types without renderer coupling'],
-          ['<code>@architprasar/md4ai/react</code>', 'Renderer, themes, and component override surface for React apps'],
+          ['<code>@md4ai/core</code>', 'Parser, streaming, bridges, and IR types without renderer coupling'],
+          ['<code>@md4ai/core</code>', 'Parser, renderer, themes, prompts, and bridge helpers in one package'],
         ]}
       />
       <H2 id="interactive-demos">Interactive Demos</H2>
@@ -415,7 +415,7 @@ export function BridgesSection({ docsTheme }: { docsTheme: DocsTheme }) {
         ['Schema', '<code>[B.string("name"), B.enum("status", [...]), ...]</code>'],
         ['Best use', 'Roadmap chips, launch badges, release summaries, ownership metadata'],
       ]} />
-      <Code>{`import { defineBridge, B } from '@architprasar/md4ai/core';
+      <Code>{`import { defineBridge, B } from '@md4ai/core';
  
 const releaseBridge = defineBridge({
   marker: 'release',
@@ -433,7 +433,7 @@ const releaseBridge = defineBridge({
  
       <H3 id="bridge-define">Define a bridge</H3>
       <P>Use <IC>defineBridge</IC> to create a new component. Use <IC>fields</IC> to declare your schema with the <IC>B</IC> factory.</P>
-      <Code>{`import { defineBridge, B } from '@architprasar/md4ai/core';
+      <Code>{`import { defineBridge, B } from '@md4ai/core';
   
 const statusBridge = defineBridge({
   marker: 'status',
@@ -462,8 +462,8 @@ const statusBridge = defineBridge({
  
       <H3 id="bridge-register">Register with parse and renderContent</H3>
       <P>Pass the same <IC>bridges</IC> array to both.</P>
-      <Code>{`import { parse } from '@architprasar/md4ai/core';
-import { renderContent } from '@architprasar/md4ai/react';
+      <Code>{`import { parse } from '@md4ai/core';
+import { renderContent } from '@md4ai/core';
  
 const bridges = [statusBridge, kpiBridge, timelineBridge];
 const nodes = parse(markdown, { bridges });
@@ -471,7 +471,7 @@ const ui = renderContent(nodes, { bridges });`}</Code>
  
       <H3 id="bridge-prompt">AI system prompt hints</H3>
       <P>md4ai uses a two-tier prompting system (**Protocol & Catalog**) to save tokens.</P>
-      <Code>{`import { getBridgeProtocolPrompt, getPrompt } from '@architprasar/md4ai/core';
+      <Code>{`import { getBridgeProtocolPrompt, getPrompt } from '@md4ai/core';
  
 // Tier 1: The universal bridge syntax rules
 const protocol = getBridgeProtocolPrompt();
@@ -552,7 +552,7 @@ export function PromptingSection() {
 
       <H3 id="get-prompt">getPrompt()</H3>
       <P>Use <IC>getPrompt()</IC> when you want a full md4ai-aware prompt. It can include the base instruction, selected built-in syntax guidance, selected bridge hints, and one of three reliability/token tradeoff modes.</P>
-      <Code>{`import { getPrompt } from '@architprasar/md4ai/core';
+      <Code>{`import { getPrompt } from '@md4ai/core';
 
 const systemPrompt = getPrompt({
   mode: 'standard',
@@ -588,7 +588,7 @@ const productReviewPrompt = getPrompt({
 
       <H3 id="bridge-prompt">Bridge prompts</H3>
       <P>Every bridge still exposes its own <IC>prompt</IC>, and <IC>getBridgePrompt()</IC> remains available when you only want the bridge-specific portion without the built-in md4ai syntax guidance.</P>
-      <Code>{`import { getBridgePrompt } from '@architprasar/md4ai/core';
+      <Code>{`import { getBridgePrompt } from '@md4ai/core';
 
 statusBridge.prompt
 // → 'Use @status[value] inline. Example: @status[success]'
@@ -605,7 +605,7 @@ export function ReferenceSections() {
     <>
       <H2 id="themes">Themes</H2>
       <P>Four built-in themes, each with light and dark variants. All use the same CSS variable names as shadcn.</P>
-      <Code>{`import { renderContent, themes } from '@architprasar/md4ai/react';
+      <Code>{`import { renderContent, themes } from '@md4ai/core';
 
 renderContent(nodes, { theme: themes.violet.dark });`}</Code>
       <Table head={['Token', 'CSS variable', 'Description']} rows={[
@@ -645,8 +645,8 @@ renderContent(nodes, {
 
       <H2 id="streaming">Streaming</H2>
       <P><IC>parseStreaming</IC> is a lenient wrapper around <IC>parse</IC>.</P>
-      <Code>{`import { parseStreaming } from '@architprasar/md4ai/core';
-import { renderContent } from '@architprasar/md4ai/react';
+      <Code>{`import { parseStreaming } from '@md4ai/core';
+import { renderContent } from '@md4ai/core';
 
 let accumulated = ';
 for await (const chunk of stream) {

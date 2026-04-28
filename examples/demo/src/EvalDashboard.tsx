@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { parse } from '@architprasar/md4ai/core';
-import { renderContent } from '@architprasar/md4ai/react';
+import { parse } from '@md4ai/core';
+import { renderContent } from '@md4ai/core';
 
 interface LatestRun {
   runId: string;

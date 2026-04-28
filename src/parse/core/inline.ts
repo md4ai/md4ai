@@ -1,5 +1,6 @@
 import type { InlineNode } from '../../types.js';
-import type { BridgeDefinition } from '../../bridge.js';
+import { isMalformedBridgeData, type BridgeDefinition } from '../../bridge.js';
+import { classifyBridgeParseError, type Md4aiDebugHook } from '../../debug.js';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -51,6 +52,8 @@ export function scanInline(
   text: string,
   bridgeSet: Set<string>,
   allBridges: BridgeDefinition[],
+  debug: Md4aiDebugHook,
+  startLine = 1,
 ): InlineNode[] {
   const nodes: InlineNode[] = [];
   let i = 0;
@@ -79,7 +82,42 @@ export function scanInline(
             const raw = partial ? rawFull.slice(0, -1) : rawFull;
             const marker = markerMatch[1];
             const bridgeDef = allBridges.find((b) => b.marker === marker);
+            const before = text.slice(0, i);
+            const lineOffset = (before.match(/\n/g) ?? []).length;
+            const lastLineBreak = before.lastIndexOf('\n');
+            const location = {
+              line: startLine + lineOffset,
+              column: i - lastLineBreak,
+              offset: i,
+            };
+            debug.emit({
+              stage: 'bridge.detected',
+              marker,
+              raw,
+              location,
+            });
             const data = bridgeDef ? bridgeDef._parse(raw) : raw;
+            if (bridgeDef) {
+              if (isMalformedBridgeData(data)) {
+                debug.emit({
+                  stage: 'bridge.parse.fail',
+                  marker,
+                  raw,
+                  location,
+                  code: classifyBridgeParseError(data.error),
+                  message: data.error instanceof Error ? data.error.message : String(data.error ?? ''),
+                  error: data.error,
+                });
+              } else {
+                debug.emit({
+                  stage: 'bridge.parse.success',
+                  marker,
+                  raw,
+                  location,
+                  detail: { partial: partial === true },
+                });
+              }
+            }
             nodes.push({ type: 'bridge', marker, raw, data, ...(partial && { partial: true }) });
             i = end;
             continue;
@@ -109,7 +147,7 @@ export function scanInline(
       if (close > i + 2) {
         flush();
         const inner = text.slice(i + 2, close);
-        nodes.push({ type: 'strong', children: scanInline(inner, bridgeSet, allBridges) });
+        nodes.push({ type: 'strong', children: scanInline(inner, bridgeSet, allBridges, debug, startLine) });
         i = close + 2;
         continue;
       }
@@ -121,7 +159,7 @@ export function scanInline(
       if (close > i + 1 && text[close + 1] !== ch) {
         flush();
         const inner = text.slice(i + 1, close);
-        nodes.push({ type: 'emphasis', children: scanInline(inner, bridgeSet, allBridges) });
+        nodes.push({ type: 'emphasis', children: scanInline(inner, bridgeSet, allBridges, debug, startLine) });
         i = close + 1;
         continue;
       }
@@ -155,7 +193,7 @@ export function scanInline(
           nodes.push({
             type: 'link',
             href: text.slice(closeBracket + 2, closeParens).trim(),
-            children: scanInline(text.slice(i + 1, closeBracket), bridgeSet, allBridges),
+            children: scanInline(text.slice(i + 1, closeBracket), bridgeSet, allBridges, debug, startLine),
           });
           i = closeParens + 1;
           continue;

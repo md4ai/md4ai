@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@architprasar/md4ai": "../../",
+    "@md4ai/core": "../../",
     "chart.js": "^4.4.9",
     "highlight.js": "^11.11.1",
     "lightweight-charts": "^5.2.0",

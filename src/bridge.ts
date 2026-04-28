@@ -22,16 +22,33 @@ export interface BridgeRenderCtx {
   emit: (event: string, data?: unknown) => void;
 }
 
+export interface BridgeFallbackCtx {
+  marker: string;
+  raw: string;
+  error?: unknown;
+}
+
+export interface MalformedBridgeData {
+  __md4aiMalformed: true;
+  raw: string;
+  error?: unknown;
+}
+
 export interface BridgeDefinition<T = unknown> {
   marker: string;
   pattern: BridgePattern<T>;
   fields?: BridgeFields;
   render: (data: T, ctx: BridgeRenderCtx) => ReactElement | null;
+  /**
+   * Optional graceful fallback renderer for malformed bridge payloads.
+   * Receives the raw content between [] so host apps can decide how to present it.
+   */
+  fallback?: (raw: string, ctx: BridgeRenderCtx, info: BridgeFallbackCtx) => ReactElement | null;
   prompt: string;
   /** Set to false to never show a skeleton placeholder while this bridge is streaming. */
   skeleton?: boolean;
   /** @internal */
-  _parse: (raw: string) => T;
+  _parse: (raw: string) => T | MalformedBridgeData;
 }
 
 /**
@@ -215,12 +232,22 @@ function isValidMarker(marker: string): boolean {
   return /^[a-z][a-z0-9-]*$/.test(marker);
 }
 
+export function isMalformedBridgeData(value: unknown): value is MalformedBridgeData {
+  return Boolean(
+    value &&
+    typeof value === 'object' &&
+    '__md4aiMalformed' in value &&
+    (value as { __md4aiMalformed?: unknown }).__md4aiMalformed === true,
+  );
+}
+
 /** Bridge defined with an explicit dType array schema. */
 export function defineBridge<F extends BridgeField<any>[]>(def: {
   marker: string;
   fields: F;
   render: (data: InferSchemaType<F>, ctx: BridgeRenderCtx) => ReactElement | null;
   onParseError?: (raw: string, error: unknown) => InferSchemaType<F>;
+  fallback?: (raw: string, ctx: BridgeRenderCtx, info: BridgeFallbackCtx) => ReactElement | null;
   /** Set to false to disable the streaming skeleton for this bridge. Default: true */
   skeleton?: boolean;
 }): BridgeDefinition<InferSchemaType<F>>;
@@ -232,6 +259,7 @@ export function defineBridge<T = string>(def: {
   render: (data: T, ctx: BridgeRenderCtx) => ReactElement | null;
   prompt?: string;
   onParseError?: (raw: string, error: unknown) => T;
+  fallback?: (raw: string, ctx: BridgeRenderCtx, info: BridgeFallbackCtx) => ReactElement | null;
   /** Set to false to disable the streaming skeleton for this bridge. Default: true */
   skeleton?: boolean;
 }): BridgeDefinition<T>;
@@ -243,6 +271,7 @@ export function defineBridge<T>(def: {
   render: (data: T, ctx: BridgeRenderCtx) => ReactElement | null;
   prompt?: string;
   onParseError?: (raw: string, error: unknown) => T;
+  fallback?: (raw: string, ctx: BridgeRenderCtx, info: BridgeFallbackCtx) => ReactElement | null;
   skeleton?: boolean;
 }): BridgeDefinition<T> {
   if (!isValidMarker(def.marker)) {
@@ -257,6 +286,7 @@ export function defineBridge<T>(def: {
     pattern,
     fields: def.fields,
     render: def.render,
+    fallback: def.fallback,
     prompt,
     ...(def.skeleton === false && { skeleton: false }),
     _parse: (raw: string) => {
@@ -269,7 +299,8 @@ export function defineBridge<T>(def: {
         //   semi  → @marker[val1; val2; key=val3]  (new compact syntax)
         //   legacy → @marker["val", key: "val"]    (backward compat)
         const hasSemi = raw.includes(';') && !raw.includes(':');
-        const tokens = hasSemi ? splitSemi(raw) : splitHybrid(raw);
+        const hasEqualsOnly = raw.includes('=') && !raw.includes(';') && !raw.includes(':');
+        const tokens = hasSemi || hasEqualsOnly ? splitSemi(raw) : splitHybrid(raw);
         const data: any = {};
         let positionalIdx = 0;
 
@@ -281,10 +312,18 @@ export function defineBridge<T>(def: {
 
           if (meta.type === 'number') {
             const num = Number(val);
-            return Number.isNaN(num) ? val : num;
+            if (Number.isNaN(num)) {
+              throw new Error(`Invalid number for field "${meta.name}": ${val}`);
+            }
+            return num;
           }
           if (meta.type === 'boolean') return val.toLowerCase() === 'true';
-          if (meta.type === 'enum') return val;
+          if (meta.type === 'enum') {
+            if (meta.options && !meta.options.includes(val)) {
+              throw new Error(`Invalid enum value for field "${meta.name}": ${val}`);
+            }
+            return val;
+          }
           if (meta.type === 'list') {
             const items = val.split(',').map((s) => s.trim()).filter(Boolean);
             return meta.itemType ? items.map((item) => parseValue(meta.itemType!, item)) : items;
@@ -318,33 +357,47 @@ export function defineBridge<T>(def: {
           const eqIdx = token.indexOf('=');
           const colonIdx = token.indexOf(':');
           const isNamed =
-            (hasSemi && eqIdx !== -1 && !token.startsWith('"')) ||
+            (eqIdx !== -1 && !token.startsWith('"')) ||
             (!hasSemi && colonIdx !== -1 && !token.startsWith('|') && !token.startsWith('"'));
 
           if (isNamed) {
-            const sep = hasSemi ? eqIdx : colonIdx;
+            const sep = eqIdx !== -1 ? eqIdx : colonIdx;
             const key = cleanToken(token.slice(0, sep));
             const val = token.slice(sep + 1);
+            const field = fields.find((f) => f.metadata.name === key);
+            if (!field) {
+              throw new Error(`Unknown field "${key}" for @${def.marker}`);
+            }
             data[key] = val;
           } else {
+            let assigned = false;
             while (positionalIdx < fields.length) {
               const field = fields[positionalIdx++];
               if (data[field.metadata.name] === undefined) {
                 data[field.metadata.name] = token;
+                assigned = true;
                 break;
               }
+            }
+            if (!assigned && token.trim().length > 0) {
+              throw new Error(`Too many positional values for @${def.marker}`);
             }
           }
         });
 
         const final: any = {};
         fields.forEach((field) => {
-          final[field.metadata.name] = parseValue(field, data[field.metadata.name]);
+          const parsed = parseValue(field, data[field.metadata.name]);
+          if (parsed === undefined && !field.metadata.optional && field.metadata.defaultValue === undefined) {
+            throw new Error(`Missing required field "${field.metadata.name}" for @${def.marker}`);
+          }
+          final[field.metadata.name] = parsed;
         });
 
         return final as T;
       } catch (e) {
-        return raw as T;
+        if (def.onParseError) return def.onParseError(raw, e);
+        return { __md4aiMalformed: true, raw, error: e } as MalformedBridgeData;
       }
     },
   };

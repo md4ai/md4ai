@@ -5,8 +5,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'md4ai',
-      fileName: 'md4ai',
+      name: 'md4aiCore',
+      fileName: 'core',
     },
     rollupOptions: {
       external: ['react', 'react-dom', 'react/jsx-runtime'],

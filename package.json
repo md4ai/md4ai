@@ -1,24 +1,16 @@
 {
-  "name": "@architprasar/md4ai",
+  "name": "@md4ai/core",
   "version": "0.1.2",
-  "description": "AI-friendly rich markdown renderer — extended markdown syntax that renders to interactive UI",
+  "description": "AI-friendly rich markdown core — extended markdown syntax that renders to interactive UI",
   "type": "module",
-  "main": "./dist/md4ai.umd.cjs",
-  "module": "./dist/md4ai.js",
+  "main": "./dist/core.umd.cjs",
+  "module": "./dist/core.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/md4ai.js",
-      "require": "./dist/md4ai.umd.cjs"
-    },
-    "./core": {
-      "types": "./dist/core.d.ts",
-      "import": "./dist/core.js"
-    },
-    "./react": {
-      "types": "./dist/react.d.ts",
-      "import": "./dist/react.js"
+      "import": "./dist/core.js",
+      "require": "./dist/core.umd.cjs"
     }
   },
   "files": [

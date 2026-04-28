@@ -11,6 +11,27 @@ Use `;` to separate fields. Commas are for inner list values within a single fie
 @kpi[label=Revenue; value=$167k; change=+18%; period=QoQ]
 ```
 
+## Fallback Contract
+
+If a bridge payload is malformed, md4ai keeps rendering stable and can hand control to your custom fallback.
+
+- Define `fallback` in `defineBridge(...)`.
+- `fallback` receives the raw payload between `[]`.
+- If no fallback is defined, md4ai renders the original token as visible text.
+
+```tsx
+const releaseBridge = defineBridge({
+  marker: 'release',
+  fields: [/* ... */],
+  render: (data) => <ReleaseCard data={data} />,
+  fallback: (raw, _ctx, info) => (
+    <span title={String(info.error ?? '')}>@release[{raw}]</span>
+  ),
+});
+```
+
+Use this for strict schemas (`number`, `enum`, record-heavy payloads) where malformed model output is expected occasionally.
+
 ---
 
 ## General purpose

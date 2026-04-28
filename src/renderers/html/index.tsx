@@ -14,6 +14,7 @@ import { Card } from './components/Card.js';
 import { Layout } from './components/Layout.js';
 import { Steps } from './components/Steps.js';
 import { Table } from './components/Table.js';
+import { createDebugHook } from '../../debug.js';
 
 function themeToStyle(theme: RenderContentOptions['theme']): React.CSSProperties {
   if (!theme) return {};
@@ -178,9 +179,51 @@ export function RenderNode({ node }: { node: IRNode }) {
 }
 
 export function renderContent(nodes: IRNode[], options: RenderContentOptions = {}): React.ReactElement {
+  const debug = createDebugHook(options.debug, options.onDebugEvent);
   const bridgeCtx = {
-    query: (key: string, params?: unknown) => options.store?.[key]?.(params),
-    emit: (event: string, data?: unknown) => options.onEvent?.(event, data),
+    query: (key: string, params?: unknown) => {
+      const startedAt = Date.now();
+      try {
+        const result = options.store?.[key]?.(params);
+        debug.emit({
+          stage: 'store.query.success',
+          durationMs: Date.now() - startedAt,
+          detail: { key },
+        });
+        return result;
+      } catch (error) {
+        debug.emit({
+          stage: 'store.query.fail',
+          durationMs: Date.now() - startedAt,
+          code: 'E_STORE_QUERY_FAILED',
+          message: error instanceof Error ? error.message : String(error ?? ''),
+          error,
+          detail: { key },
+        });
+        throw error;
+      }
+    },
+    emit: (event: string, data?: unknown) => {
+      const startedAt = Date.now();
+      try {
+        options.onEvent?.(event, data);
+        debug.emit({
+          stage: 'store.emit.success',
+          durationMs: Date.now() - startedAt,
+          detail: { event },
+        });
+      } catch (error) {
+        debug.emit({
+          stage: 'store.emit.fail',
+          durationMs: Date.now() - startedAt,
+          code: 'E_STORE_EMIT_FAILED',
+          message: error instanceof Error ? error.message : String(error ?? ''),
+          error,
+          detail: { event },
+        });
+        throw error;
+      }
+    },
   };
 
   const ctx = {
@@ -191,6 +234,7 @@ export function renderContent(nodes: IRNode[], options: RenderContentOptions = {
     bridges: options.bridges ?? [],
     bridgeCtx,
     skeletons: options.skeletons !== false,
+    debug,
   };
 
   const style = themeToStyle(options.theme);

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { parse, parseStreaming } from '@architprasar/md4ai/core';
-import { renderContent, themes } from '@architprasar/md4ai/react';
-import type { ThemeName } from '@architprasar/md4ai/react';
+import { parse, parseStreaming } from '@md4ai/core';
+import { renderContent, themes } from '@md4ai/core';
+import type { ThemeName } from '@md4ai/core';
 import { SAMPLE_CONTENTS } from './sampleContent.js';
 import { BRIDGES } from './bridges.js';
 import { SiteHeader } from './components/SiteHeader.js';
@@ -162,7 +162,7 @@ export default function App() {
                   with the rendered output side by side.
                 </p>
                 <div className="playground-intro__code">
-                  <code>{"import { parse } from '@architprasar/md4ai/core'"}</code>
+                  <code>{"import { parse } from '@md4ai/core'"}</code>
                 </div>
               </div>
               <div className="playground-intro__meta">

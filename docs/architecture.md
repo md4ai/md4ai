@@ -20,11 +20,9 @@ Key files:
 
 `src/renderers/html/` turns IR nodes into React elements. `renderContent()` provides themed default components while still allowing host apps to override individual node renderers.
 
-The package exposes a clean split:
+The package keeps the public surface in one place:
 
-- `@architprasar/md4ai/core` for parsing, streaming, bridges, and IR types
-- `@architprasar/md4ai/react` for `renderContent()`, themes, and renderer override types
-- `@architprasar/md4ai` as the compatibility entry that re-exports both
+- `@md4ai/core` exports parsing, streaming, bridges, prompts, `renderContent()`, themes, and renderer override types
 
 The renderer intentionally separates parsing from presentation:
 

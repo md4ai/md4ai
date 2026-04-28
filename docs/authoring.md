@@ -15,7 +15,7 @@ Instead of plain objects, md4ai uses a fluent **dType** API to define bridge fie
 ### Basic Example
 
 ```tsx
-import { defineBridge, B } from '@architprasar/md4ai/core';
+import { defineBridge, B } from '@md4ai/core';
 
 export const kpiBridge = defineBridge({
   marker: 'kpi',
@@ -99,7 +99,7 @@ A compressed manifest of your registered bridges. Use `getPrompt({ bridges, mode
 
 To generate these prompts:
 ```ts
-import { getBridgeProtocolPrompt, getPrompt } from '@architprasar/md4ai/core';
+import { getBridgeProtocolPrompt, getPrompt } from '@md4ai/core';
 
 // 1. Get the universal protocol rules
 const protocol = getBridgeProtocolPrompt();
@@ -107,3 +107,35 @@ const protocol = getBridgeProtocolPrompt();
 // 2. Get the component manifest (Catalog)
 const catalog = getPrompt({ bridges, mode: 'minimal' });
 ```
+
+---
+
+## Fallback Rendering For Malformed Payloads
+
+For production bridges, define a `fallback` renderer so malformed model output never breaks the UI.
+
+When parsing fails, md4ai passes the raw content between `[]` to `fallback(raw, ctx, info)`.
+
+```tsx
+import { defineBridge, B } from '@md4ai/core';
+
+const strictKpi = defineBridge({
+  marker: 'kpi',
+  fields: [
+    B.string('label'),
+    B.number('value'),
+  ],
+  render: ({ label, value }) => <strong>{label}: {value}</strong>,
+  fallback: (raw) => <code>@kpi[{raw}]</code>,
+});
+```
+
+`info` includes:
+- `marker`: bridge marker name
+- `raw`: raw payload between `[]`
+- `error`: parse or render error when available
+
+Recommended pattern:
+1. Keep `render` strict.
+2. Keep `fallback` simple and visible.
+3. Log `info.error` via debug events in development.

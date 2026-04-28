@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { themes } from '@architprasar/md4ai/react';
+import { themes } from '@md4ai/core';
 import { SiteBackdrop } from './components/SiteBackdrop.js';
 import { SiteHeader } from './components/SiteHeader.js';
 import { DOCS_NAV, DocsHeroSection, GettingStartedSection, PromptingSection, SyntaxSection, BridgesSection, ReferenceSections } from './docs/sections.js';
@@ -62,7 +62,7 @@ export default function DocsPage() {
         position="fixed"
         rightSlot={
           <>
-            <code className="playground-intro__code" style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }}>npm install @architprasar/md4ai</code>
+            <code className="playground-intro__code" style={{ padding: '0.35rem 0.6rem', fontSize: '0.75rem' }}>npm install @md4ai/core</code>
             <button onClick={() => setIsDark((d) => !d)} className="btn-icon">
               {isDark ? 'Light' : 'Dark'}
             </button>

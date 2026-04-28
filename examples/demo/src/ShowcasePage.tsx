@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { parseStreaming } from '@architprasar/md4ai/core';
-import { renderContent, themes } from '@architprasar/md4ai/react';
+import { parseStreaming } from '@md4ai/core';
+import { renderContent, themes } from '@md4ai/core';
 import { BRIDGES } from './bridges.js';
 import { SHOWCASE_CONTENT } from './showcaseContent.js';
 import { SiteBackdrop } from './components/SiteBackdrop.js';
@@ -168,7 +168,7 @@ export default function ShowcasePage() {
                 background: 'var(--surface2)', border: '1px solid var(--border)',
                 borderRadius: '0.7rem', padding: '0.72rem 0.9rem',
                 fontSize: '0.82rem', fontWeight: 500, fontFamily: 'JetBrains Mono, monospace',
-              }}>npm install @architprasar/md4ai</code>
+              }}>npm install @md4ai/core</code>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' as const }}>
@@ -295,7 +295,7 @@ export default function ShowcasePage() {
               Happy path
             </span>
             <code style={{ display: 'block', fontFamily: 'JetBrains Mono, monospace', fontSize: '0.8rem', lineHeight: 1.75, whiteSpace: 'pre-wrap' as const }}>
-              {`import { parseStreaming } from '@architprasar/md4ai/core';\nimport { renderContent } from '@architprasar/md4ai/react';`}
+              {`import { parseStreaming } from '@md4ai/core';\nimport { renderContent } from '@md4ai/core';`}
             </code>
           </div>
         </div>

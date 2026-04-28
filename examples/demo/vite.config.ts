@@ -7,9 +7,7 @@ export default defineConfig(({ command }) => ({
   plugins: [react()],
   resolve: {
     alias: {
-      '@architprasar/md4ai/core': resolve(__dirname, '../../src/core.ts'),
-      '@architprasar/md4ai/react': resolve(__dirname, '../../src/react.ts'),
-      '@architprasar/md4ai': resolve(__dirname, '../../src/index.ts'),
+      '@md4ai/core': resolve(__dirname, '../../src/index.ts'),
     },
   },
   build: {
@@ -50,14 +48,13 @@ export default defineConfig(({ command }) => ({
           if (normalized.startsWith(repoSrc)) {
             if (
               normalized.includes('/src/parse/') ||
-              normalized.endsWith('/src/core.ts')
+              normalized.endsWith('/src/index.ts')
             ) {
               return 'md4ai-core';
             }
 
             if (
               normalized.includes('/src/renderers/') ||
-              normalized.endsWith('/src/react.ts') ||
               normalized.endsWith('/src/themes.ts') ||
               normalized.endsWith('/src/bridge.ts') ||
               normalized.endsWith('/src/types.ts')

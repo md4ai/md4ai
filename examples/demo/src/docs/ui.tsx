@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { builtinPromptTopics, getPrompt, parseStreaming } from '@architprasar/md4ai/core';
-import type { PromptMode } from '@architprasar/md4ai/core';
-import { renderContent } from '@architprasar/md4ai/react';
+import { builtinPromptTopics, getPrompt, parseStreaming } from '@md4ai/core';
+import type { PromptMode } from '@md4ai/core';
+import { renderContent } from '@md4ai/core';
 import { BRIDGES } from '../bridges.js';
 
 export type DocsTheme = Record<string, string>;

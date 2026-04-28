@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import type { InlineNode } from '../../../types.js';
 import { RenderContext } from '../context.js';
+import { isMalformedBridgeData } from '../../../bridge.js';
 
 interface Props {
   nodes: InlineNode[];
@@ -36,7 +37,7 @@ function BridgeSkeleton({ marker }: { marker: string }) {
 }
 
 export function Inline({ nodes }: Props) {
-  const { bridges, bridgeCtx, skeletons } = useContext(RenderContext);
+  const { bridges, bridgeCtx, skeletons, debug } = useContext(RenderContext);
 
   return (
     <>
@@ -72,9 +73,64 @@ export function Inline({ nodes }: Props) {
             }
             const bridge = bridges.find((b) => b.marker === node.marker);
             if (!bridge) return <span key={`b-${i}`} className="md4ai-bridge--unknown">@{node.marker}[{node.raw}]</span>;
+            if (isMalformedBridgeData(node.data)) {
+              if (bridge.fallback) {
+                try {
+                  debug.emit({
+                    stage: 'bridge.fallback.used',
+                    marker: node.marker,
+                    raw: node.data.raw,
+                    code: 'E_BRIDGE_PARSE',
+                    message: node.data.error instanceof Error ? node.data.error.message : String(node.data.error ?? ''),
+                    error: node.data.error,
+                  });
+                  return (
+                    <React.Fragment key={`b-${i}`}>
+                      {bridge.fallback(node.data.raw, bridgeCtx, { marker: node.marker, raw: node.data.raw, error: node.data.error })}
+                    </React.Fragment>
+                  );
+                } catch {
+                  return <span key={`b-${i}`} className="md4ai-bridge--unknown">@{node.marker}[{node.raw}]</span>;
+                }
+              }
+              return <span key={`b-${i}`} className="md4ai-bridge--unknown">@{node.marker}[{node.raw}]</span>;
+            }
             try {
-              return <React.Fragment key={`b-${i}`}>{bridge.render(node.data, bridgeCtx)}</React.Fragment>;
-            } catch {
+              const rendered = bridge.render(node.data, bridgeCtx);
+              debug.emit({
+                stage: 'bridge.render.success',
+                marker: node.marker,
+                raw: node.raw,
+              });
+              return <React.Fragment key={`b-${i}`}>{rendered}</React.Fragment>;
+            } catch (error) {
+              debug.emit({
+                stage: 'bridge.render.fail',
+                marker: node.marker,
+                raw: node.raw,
+                code: 'E_RENDER_THROW',
+                message: error instanceof Error ? error.message : String(error ?? ''),
+                error,
+              });
+              if (bridge.fallback) {
+                try {
+                  debug.emit({
+                    stage: 'bridge.fallback.used',
+                    marker: node.marker,
+                    raw: node.raw,
+                    code: 'E_RENDER_THROW',
+                    message: error instanceof Error ? error.message : String(error ?? ''),
+                    error,
+                  });
+                  return (
+                    <React.Fragment key={`b-${i}`}>
+                      {bridge.fallback(node.raw, bridgeCtx, { marker: node.marker, raw: node.raw, error })}
+                    </React.Fragment>
+                  );
+                } catch {
+                  return <span key={`b-${i}`} className="md4ai-bridge--unknown">@{node.marker}[{node.raw}]</span>;
+                }
+              }
               return <span key={`b-${i}`} className="md4ai-bridge--unknown">@{node.marker}[{node.raw}]</span>;
             }
           }

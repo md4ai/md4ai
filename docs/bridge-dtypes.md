@@ -84,7 +84,7 @@ To keep context windows clean, `getPrompt()` follows a hierarchy of brevity:
 ## Example: Advanced Bridge Definition
 
 ```tsx
-import { defineBridge, B } from '@architprasar/md4ai/core';
+import { defineBridge, B } from '@md4ai/core';
 
 const kpiBridge = defineBridge({
   marker: 'kpi',

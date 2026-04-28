@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { builtinPromptTopics, defineBridge, getBridgePrompt, getPrompt, parse, parseBridgeData, renderContent } from '../.test-dist/test/entry.js';
+import { B, builtinPromptTopics, defineBridge, getBridgePrompt, getPrompt, parse, parseBridgeData, renderContent } from '../.test-dist/test/entry.js';
 
 test('parse resolves registered bridges using their declared pattern', () => {
   const statusBridge = defineBridge({
@@ -74,7 +75,7 @@ test('parseBridgeData exposes the built-in bridge parsers for reuse', () => {
   assert.deepEqual(parseBridgeData('range', '100 -> 500'), { min: '100', max: '500' });
 });
 
-test('defineBridge falls back to raw bridge data when a custom parser throws', () => {
+test('defineBridge marks malformed bridge data when a custom parser throws', () => {
   const flakyBridge = defineBridge({
     marker: 'flaky',
     pattern: () => {
@@ -85,12 +86,25 @@ test('defineBridge falls back to raw bridge data when a custom parser throws', (
 
   const nodes = parse('Result: @flaky[still-visible]', { bridges: [flakyBridge] });
   assert.equal(nodes[0].type, 'paragraph');
-  assert.deepEqual(nodes[0].children[1], {
-    type: 'bridge',
-    marker: 'flaky',
-    raw: 'still-visible',
-    data: 'still-visible',
+  assert.equal(nodes[0].children[1].type, 'bridge');
+  assert.equal(nodes[0].children[1].marker, 'flaky');
+  assert.equal(nodes[0].children[1].raw, 'still-visible');
+  assert.equal(nodes[0].children[1].data.__md4aiMalformed, true);
+  assert.equal(nodes[0].children[1].data.raw, 'still-visible');
+});
+
+test('bridge fallback receives malformed raw payload between brackets', () => {
+  const strictKpi = defineBridge({
+    marker: 'kpi',
+    fields: [B.number('value')],
+    render: (data) => null,
+    fallback: (raw) => React.createElement('span', { className: 'bridge-fallback' }, `fallback:${raw}`),
   });
+
+  const nodes = parse('Metric @kpi[not-a-number].', { bridges: [strictKpi] });
+  const html = renderToStaticMarkup(renderContent(nodes, { bridges: [strictKpi] }));
+
+  assert.match(html, /fallback:not-a-number/);
 });
 
 test('defineBridge rejects invalid marker names up front', () => {

@@ -2,10 +2,23 @@ import type { IRNode } from '../../types.js';
 import type { ParseOptions } from '../../types.js';
 import { makeState } from './state.js';
 import { parseBlocks } from './blocks.js';
+import { createDebugHook } from '../../debug.js';
 
 export function parse(markdown: string, options: ParseOptions = {}): IRNode[] {
   const { bridges = [] } = options;
-  return parseBlocks(makeState(markdown, bridges));
+  const debug = createDebugHook(options.debug, options.onDebugEvent);
+  const startedAt = Date.now();
+  debug.emit({
+    stage: 'markdown.parse.start',
+    detail: { length: markdown.length, bridgeCount: bridges.length },
+  });
+  const nodes = parseBlocks(makeState(markdown, bridges, debug));
+  debug.emit({
+    stage: 'markdown.parse.end',
+    durationMs: Date.now() - startedAt,
+    detail: { nodeCount: nodes.length },
+  });
+  return nodes;
 }
 
 // Streaming variant: close unclosed fences before parsing

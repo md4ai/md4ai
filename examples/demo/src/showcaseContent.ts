@@ -57,9 +57,9 @@ Coverage dropped in the two highest-risk modules. The deleted billing test file 
 
 Checkout p95 latency trended up across the last 7 commits on this branch. The regression correlates with the new validation layer running full schema checks on every request — including read-only status pings that do not require them.
 
-Checkout p95 latency: @sparkline[|38, 41, 45, 49, 58, 62, 71|]
-DB query time (ms): @sparkline[|11, 12, 11, 14, 18, 21, 19|]
-Bundle size delta (kb): @sparkline[|0, 0, 2, 2, 8, 8, 8|]
+Checkout p95 latency: @sparkline[38, 41, 45, 49, 58, 62, 71]
+DB query time (ms): @sparkline[11, 12, 11, 14, 18, 21, 19]
+Bundle size delta (kb): @sparkline[0, 0, 2, 2, 8, 8, 8]
 
 ---
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Callout, Code, H2, H3, IC, InteractiveDemo, P, PromptBuilderDemo, PromptRecipeCards, Table, type DocsTheme } from './ui.js';
+import { BridgeInspectorDemo, Callout, Code, H2, H3, IC, InteractiveDemo, P, PromptBuilderDemo, PromptRecipeCards, Table, type DocsTheme } from './ui.js';
 import { getPrompt } from '@md4ai/core';
 import { BRIDGES } from '../bridges.js';
 
@@ -94,6 +94,8 @@ export const DOCS_NAV: { label: string; id: string; children?: { label: string; 
       { label: 'Fields', id: 'bridge-fields' },
       { label: 'Patterns', id: 'bridge-patterns' },
       { label: 'Register', id: 'bridge-register' },
+      { label: 'Fallbacks', id: 'bridge-fallbacks' },
+      { label: 'Debug Inspector', id: 'bridge-inspector' },
       { label: 'Host Data', id: 'bridge-host' },
     ],
   },
@@ -179,6 +181,12 @@ https://www.youtube.com/watch?v=dQw4w9WgXcQ
   bridge: `The next release is @release[Agent Inbox; beta; July 2026; Core UX].
 
 If launch confidence drops, mark it as @release[Mobile parity; blocked; TBD; Mobile].`,
+  bridgeInspector: `Valid:
+@release[Agent Inbox; beta; July 2026; Core UX]
+
+Malformed (enum + field mismatch):
+@release[Mobile parity; exploding; TBD; Mobile]
+@release[name=Admin controls; owner=Platform; status=launched]`,
 };
 
 const ROADMAP_DEMO = `## Product Review
@@ -468,6 +476,48 @@ import { renderContent } from '@md4ai/core';
 const bridges = [statusBridge, kpiBridge, timelineBridge];
 const nodes = parse(markdown, { bridges });
 const ui = renderContent(nodes, { bridges });`}</Code>
+
+      <H3 id="bridge-fallbacks">Fallbacks for malformed payloads</H3>
+      <P>For strict schemas, add a <IC>fallback</IC> renderer so malformed bridge payloads never break your message UI.</P>
+      <Code>{`const releaseBridge = defineBridge({
+  marker: 'release',
+  fields: [
+    B.string('name'),
+    B.enum('status', ['live', 'beta', 'planned', 'blocked']),
+  ],
+  render: ({ name, status }) => <ReleaseBadge name={name} status={status} />,
+  fallback: (raw, _ctx, info) => (
+    <code title={String(info.error ?? '')}>@release[{raw}]</code>
+  ),
+});`}</Code>
+      <Table head={['Behavior', 'Result']} rows={[
+        ['Valid payload', 'Normal bridge component renders'],
+        ['Malformed payload + fallback', 'Your fallback receives raw content between []'],
+        ['Malformed payload without fallback', 'Original token is shown as visible text'],
+      ]} />
+
+      <H3 id="bridge-inspector">Debug inspector events</H3>
+      <P>Enable debug events to isolate exactly where failures happen: parse, schema, store, or render.</P>
+      <Code>{`import { createInspectorStore, parse, renderContent } from '@md4ai/core';
+
+const inspector = createInspectorStore(600);
+const debug = { enabled: true, onEvent: inspector.onEvent };
+
+const nodes = parse(markdown, { bridges, debug });
+const ui = renderContent(nodes, { bridges, debug, store, onEvent });
+// inspector.getEvents() -> timeline of markdown.parse.*, bridge.*, store.* events`}</Code>
+      <Table head={['Common stage', 'What it means']} rows={[
+        ['<code>bridge.parse.fail</code>', 'Malformed bridge payload or schema mismatch'],
+        ['<code>bridge.fallback.used</code>', 'Fallback path handled parse/render failure'],
+        ['<code>store.query.fail</code>', 'Host data lookup failed'],
+        ['<code>bridge.render.fail</code>', 'Bridge component threw while rendering'],
+      ]} />
+      <BridgeInspectorDemo
+        title="Live fallback + inspector demo"
+        description="Edit valid and malformed @release payloads to see fallback rendering and debug events in real time."
+        initial={LIVE_DEMOS.bridgeInspector}
+        theme={docsTheme}
+      />
  
       <H3 id="bridge-prompt">AI system prompt hints</H3>
       <P>md4ai uses a two-tier prompting system (**Protocol & Catalog**) to save tokens.</P>
@@ -666,6 +716,8 @@ for await (const chunk of stream) {
       <Table head={['Option', 'Type', 'Default', 'Description']} rows={[
         ['<code>gfm</code>', '<code>boolean</code>', '<code>true</code>', 'Enable GFM — tables, task lists, strikethrough'],
         ['<code>bridges</code>', '<code>BridgeDefinition[]</code>', '<code>[]</code>', 'Registers @marker tokens for the parser'],
+        ['<code>debug</code>', '<code>boolean | Md4aiDebugOptions</code>', '<code>false</code>', 'Enable structured parse/bridge debug events'],
+        ['<code>onDebugEvent</code>', '<code>(event) => void</code>', '-', 'Convenience debug event handler'],
       ]} />
       <P>Returns <IC>IRNode[]</IC> — plain serializable JSON, framework-agnostic intermediate representation.</P>
       <H3>parseStreaming(markdown, options?)</H3>
@@ -676,12 +728,15 @@ for await (const chunk of stream) {
         ['<code>highlight</code>', '<code>(code, lang) => string | null</code>', 'Syntax highlighter for code blocks'],
         ['<code>components</code>', '<code>ComponentOverrides</code>', 'Replace built-in node renderers'],
         ['<code>bridges</code>', '<code>BridgeDefinition[]</code>', 'Registered bridge renderers'],
+        ['<code>debug</code>', '<code>boolean | Md4aiDebugOptions</code>', 'Enable render/store/fallback debug events'],
+        ['<code>onDebugEvent</code>', '<code>(event) => void</code>', 'Convenience debug event handler'],
       ]} />
       <H3>defineBridge(options)</H3>
       <Table head={['Option', 'Type', 'Description']} rows={[
         ['<code>marker</code>', '<code>string</code>', 'The @marker name — lowercase letters and hyphens'],
         ['<code>fields</code>', '<code>BridgeField[]</code>', 'Fluent array of dTypes (e.g. [B.string("id")])'],
         ['<code>render</code>', '<code>(data: T, ctx: BridgeRenderCtx) => ReactElement | null</code>', 'Renders the component'],
+        ['<code>fallback</code>', '<code>(raw, ctx, info) => ReactElement | null</code>', 'Graceful UI fallback when payload parse/render fails'],
         ['<code>prompt</code>', '<code>string</code>', 'Overrides the auto-generated AI system prompt hint'],
         ['<code>onParseError</code>', '<code>(raw, error) => T</code>', 'Safe fallback when a custom parser throws'],
       ]} />

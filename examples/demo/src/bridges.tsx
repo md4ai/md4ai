@@ -334,10 +334,8 @@ export const kpiBridge = defineBridge({
 
 export const sparklineBridge = defineBridge({
   marker: 'sparkline',
-  fields: [
-    B.list('items', B.string()).describe('Numbers to plot (e.g. 44, 47, 51)'),
-  ],
-  render: ({ items }) => {
+  pattern: 'array',
+  render: (items) => {
     const values = (items || []).map(Number).filter((n) => !isNaN(n));
     if (values.length < 2) return null;
 
@@ -359,16 +357,19 @@ export const sparklineBridge = defineBridge({
       values.map((v, i) => `L${toX(i).toFixed(1)},${toY(v).toFixed(1)}`).join(' ') +
       ` L${toX(values.length - 1).toFixed(1)},${height} Z`;
 
+    // Unique ID for the gradient to prevent conflicts between multiple sparklines
+    const gradId = React.useId().replace(/:/g, '');
+
     return (
       <span className="showcase-bridge showcase-bridge--sparkline" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', verticalAlign: 'middle' }}>
         <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ overflow: 'visible' }}>
           <defs>
-            <linearGradient id="spark-fill" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id={`grad-${gradId}`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={trending} stopOpacity="0.16" />
               <stop offset="100%" stopColor={trending} stopOpacity="0" />
             </linearGradient>
           </defs>
-          <path d={areaPath} fill="url(#spark-fill)" />
+          <path d={areaPath} fill={`url(#grad-${gradId})`} />
           <polyline points={points} fill="none" stroke={trending} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
           <circle cx={toX(values.length - 1)} cy={toY(last)} r="2.5" fill={trending} />
         </svg>
@@ -676,6 +677,28 @@ export const releaseBridge = defineBridge({
       </span>
     );
   },
+  fallback: (raw, _ctx, info) => (
+    <span
+      className="showcase-bridge showcase-bridge--release-fallback"
+      title={String(info.error ?? 'Malformed release payload')}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        padding: '0.55rem 0.7rem',
+        borderRadius: '0.7rem',
+        border: '1px dashed color-mix(in srgb, #ef4444 38%, var(--border))',
+        background: 'color-mix(in srgb, #ef4444 8%, var(--surface))',
+        color: 'color-mix(in srgb, #ef4444 78%, var(--text))',
+        fontSize: '0.74rem',
+        fontFamily: 'JetBrains Mono, monospace',
+        margin: '0.2rem 0',
+      }}
+    >
+      <strong style={{ fontSize: '0.66rem', letterSpacing: '0.07em' }}>FALLBACK</strong>
+      <span>@release[{raw}]</span>
+    </span>
+  ),
 });
 
 export const agentBridge = defineBridge({

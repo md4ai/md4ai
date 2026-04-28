@@ -389,3 +389,117 @@ export function PromptBuilderDemo() {
     </section>
   );
 }
+
+export function BridgeInspectorDemo({
+  title,
+  description,
+  initial,
+  theme,
+}: {
+  title: string;
+  description: string;
+  initial: string;
+  theme: DocsTheme;
+}) {
+  const [source, setSource] = useState(initial);
+
+  const { rendered, events } = useMemo(() => {
+    const nextEvents: Array<{ stage: string; marker?: string; code?: string; message?: string }> = [];
+    const onDebugEvent = (event: { stage: string; marker?: string; code?: string; message?: string }) => {
+      nextEvents.push({
+        stage: event.stage,
+        marker: event.marker,
+        code: event.code,
+        message: event.message,
+      });
+    };
+    const nodes = parseStreaming(source, { bridges: BRIDGES, debug: { enabled: true, onEvent: onDebugEvent } });
+    const renderedUi = renderContent(nodes, {
+      bridges: BRIDGES,
+      theme,
+      debug: { enabled: true, onEvent: onDebugEvent },
+    });
+    return {
+      rendered: renderedUi,
+      events: nextEvents.slice(-14),
+    };
+  }, [source, theme]);
+
+  return (
+    <section className="docs-demo" style={{
+      border: '1px solid var(--border)', background: 'var(--surface)', borderRadius: '1rem',
+      overflow: 'hidden', marginBottom: '1.4rem', boxShadow: '0 18px 40px -30px rgb(15 23 42 / 0.2)',
+    }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        gap: '1rem', padding: '0.95rem 1.05rem', borderBottom: '1px solid var(--border)',
+        background: 'linear-gradient(180deg, color-mix(in srgb, var(--accent) 4%, var(--surface)) 0%, var(--surface) 100%)',
+      }}>
+        <div>
+          <strong style={{ display: 'block', fontSize: '0.92rem', letterSpacing: '-0.02em', marginBottom: '0.15rem' }}>{title}</strong>
+          <span style={{ display: 'block', color: 'var(--text-muted)', fontSize: '0.8rem', lineHeight: 1.55 }}>{description}</span>
+        </div>
+        <button onClick={() => setSource(initial)} className="btn-icon">Reset</button>
+      </div>
+      <div className="docs-demo__grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 0.9fr) minmax(0, 1.1fr)' }}>
+        <div className="docs-demo__editor" style={{ borderRight: '1px solid var(--border)', minWidth: 0 }}>
+          <div style={{
+            height: 34, display: 'flex', alignItems: 'center', padding: '0 0.95rem',
+            borderBottom: '1px solid var(--border)', background: 'var(--surface2)',
+            fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)',
+          }}>
+            Markdown input
+          </div>
+          <textarea
+            value={source}
+            onChange={(event) => setSource(event.target.value)}
+            spellCheck={false}
+            style={{
+              width: '100%', minHeight: 220, border: 'none', outline: 'none', resize: 'vertical',
+              padding: '1rem', background: 'var(--surface)', color: 'var(--text)',
+              fontFamily: 'JetBrains Mono, monospace', fontSize: '0.8rem', lineHeight: 1.7,
+            }}
+          />
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <div style={{
+            height: 34, display: 'flex', alignItems: 'center', padding: '0 0.95rem',
+            borderBottom: '1px solid var(--border)', background: 'var(--surface2)',
+            fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)',
+          }}>
+            Preview + debug timeline
+          </div>
+          <div style={{ padding: '1.05rem 1.15rem 0.7rem', overflowX: 'auto' }}>{rendered}</div>
+          <div style={{ borderTop: '1px solid var(--border)', padding: '0.7rem 0.9rem 0.9rem', background: 'color-mix(in srgb, var(--surface2) 70%, var(--surface))' }}>
+            <div style={{ fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--text-muted)', fontWeight: 700, marginBottom: '0.45rem' }}>
+              Recent events
+            </div>
+            <div style={{ display: 'grid', gap: '0.35rem' }}>
+              {events.length === 0 ? (
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No events yet.</span>
+              ) : events.map((event, idx) => (
+                <div
+                  key={`${event.stage}-${idx}`}
+                  style={{
+                    fontSize: '0.73rem',
+                    color: 'var(--text)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '0.55rem',
+                    padding: '0.35rem 0.5rem',
+                    background: 'var(--surface)',
+                    fontFamily: 'JetBrains Mono, monospace',
+                  }}
+                >
+                  {event.stage}
+                  {event.marker ? ` · ${event.marker}` : ''}
+                  {event.code ? ` · ${event.code}` : ''}
+                  {event.message ? ` · ${event.message}` : ''}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
